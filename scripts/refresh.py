@@ -25,6 +25,15 @@ def main():
         except KeyError: missing.append(t); continue
         if df.empty: missing.append(t); continue
         df = df.reset_index()[["Date", "Open", "High", "Low", "Close", "Volume"]]; df["Symbol"] = "NIFTY50" if t == "^NSEI" else t[:-3]; frames.append(df)
+    for t in list(missing):  # one retry per failed ticker
+        try:
+            df = yf.download(t, start=START, auto_adjust=True, progress=False)
+            if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
+            df = df.dropna(how="all")
+            if df.empty: continue
+            df = df.reset_index()[["Date", "Open", "High", "Low", "Close", "Volume"]]; df["Symbol"] = "NIFTY50" if t == "^NSEI" else t[:-3]
+            frames.append(df); missing.remove(t)
+        except Exception as e: print("retry failed", t, e)
     px = pd.concat(frames); px["Date"] = pd.to_datetime(px["Date"]).dt.strftime("%Y-%m-%d"); px = px[px.Close > 0]
     n_ok = px.Symbol.nunique(); print(f"{n_ok} series, missing: {missing}")
     if "NIFTY50" not in set(px.Symbol) or n_ok < 150: sys.exit("Too few series — keeping previous data")
