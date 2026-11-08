@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0e1214">
+<title>Sthir — NSE Swing Research</title>
+<style>
+:root{
+  --bg:#0e1214; --panel:#151a1d; --panel2:#1b2125; --line:#273036; --text:#e6ebee; --muted:#8b979f; --faint:#5d6870;
+  --accent:#3fc98a; --accent-ink:#06261a; --warn:#e8b04a; --bad:#ef6461; --info:#6ea8ff;
+  --r:14px; --pad:16px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", system-ui, Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: light){
+  :root{ --bg:#f3f5f4; --panel:#ffffff; --panel2:#f7f9f8; --line:#dfe5e3; --text:#14201b; --muted:#5d6b66; --faint:#8a9893; --accent:#13955d; --accent-ink:#ffffff; --warn:#a86b00; --bad:#c8312e; --info:#2c62c9; }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+.num,td.n,.kpi b{font-variant-numeric:tabular-nums}
+.shell{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;height:100vh;border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:4px;background:var(--panel)}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px 18px}
+.brand .mark{width:30px;height:30px;border-radius:9px;background:var(--accent);display:grid;place-items:center;color:var(--accent-ink);font-weight:800;font-size:15px}
+.brand b{font-size:17px;letter-spacing:.2px}.brand small{display:block;color:var(--muted);font-size:11.5px;margin-top:-2px}
+.navbtn{display:flex;align-items:center;gap:12px;border:0;background:none;padding:10px 12px;border-radius:10px;color:var(--muted);cursor:pointer;text-align:left;font-weight:550}
+.navbtn svg{width:19px;height:19px;flex:none}
+.navbtn:hover{background:var(--panel2);color:var(--text)}
+.navbtn.on{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
+.side .foot{margin-top:auto;color:var(--faint);font-size:12px;padding:8px}
+main{padding:28px 32px 60px;max-width:1240px;width:100%}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+h1{font-size:24px;margin:0;letter-spacing:-.2px}
+h2{font-size:16px;margin:0 0 12px}
+h3{font-size:14px;margin:18px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:650}
+.sub{color:var(--muted);font-size:13.5px;margin-top:3px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:var(--pad);margin-bottom:14px}
+.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.kpi span{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi b{display:block;font-size:19px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi i{font-style:normal;font-size:12px;color:var(--faint)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12.5px;font-weight:650;border:1px solid var(--line);background:var(--panel2);white-space:nowrap}
+.pill.good{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.pill.bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent);background:color-mix(in srgb,var(--bad) 10%,transparent)}
+.pill.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent);background:color-mix(in srgb,var(--warn) 10%,transparent)}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+.pos{color:var(--accent)}.neg{color:var(--bad)}.muted{color:var(--muted)}.warnc{color:var(--warn)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--panel2);padding:9px 14px;border-radius:10px;cursor:pointer;font-weight:600;font-size:14px;min-height:40px;white-space:nowrap}
+.btn:hover{border-color:var(--faint)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn.sm{padding:6px 10px;min-height:32px;font-size:13px}
+.btn.danger{color:var(--bad)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 calc(var(--pad)*-1);padding:0 var(--pad)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:12px;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:top}
+td.n,th.n{text-align:right}
+tr:last-child td{border-bottom:0}
+.empty{padding:26px 10px;text-align:center;color:var(--muted)}
+.banner{border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13.5px;border:1px solid}
+.banner.warn{border-color:color-mix(in srgb,var(--warn) 45%,transparent);background:color-mix(in srgb,var(--warn) 9%,transparent)}
+.banner.bad{border-color:color-mix(in srgb,var(--bad) 45%,transparent);background:color-mix(in srgb,var(--bad) 8%,transparent)}
+.banner.info{border-color:color-mix(in srgb,var(--info) 40%,transparent);background:color-mix(in srgb,var(--info) 8%,transparent)}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-size:12.5px;color:var(--muted)}
+.field input,.field select,textarea{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:9px 10px;min-height:40px;width:100%}
+.fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:8px 0;cursor:pointer}
+.chk input{width:20px;height:20px;accent-color:var(--accent);flex:none;margin-top:1px}
+.seg{display:inline-flex;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;padding:7px 12px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:600;font-size:13px}
+.seg button.on{background:var(--panel);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.steps li{display:flex;gap:10px;align-items:center;padding:7px 0;font-size:13.5px}
+.steps .ic{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;flex:none;border:1.5px solid var(--line);color:var(--muted)}
+.steps .ok .ic{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.steps .wait .ic{border-color:var(--warn);color:var(--warn)}
+.chart{width:100%;overflow:hidden}
+.chart svg{display:block}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.prose{max-width:820px}
+.prose p,.prose li{color:var(--text)}
+.prose li{margin:4px 0}
+.prose .lead{font-size:16px}
+.callout{border-left:3px solid var(--accent);padding:4px 0 4px 14px;margin:14px 0}
+.callout.warn{border-color:var(--warn)}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.bar{height:6px;border-radius:4px;background:var(--panel2);overflow:hidden;margin-top:6px}
+.bar > div{height:100%;background:var(--accent)}
+.bar.warn > div{background:var(--warn)}.bar.bad > div{background:var(--bad)}
+.prog{height:4px;background:var(--panel2);border-radius:4px;overflow:hidden;margin:10px 0}
+.prog div{height:100%;background:var(--accent);width:0;transition:width .2s}
+.tabbar{display:none}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:grid;place-items:center;z-index:50;padding:18px}
+.dialog{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:520px;width:100%;padding:20px;max-height:85vh;overflow:auto}
+.dialog h2{margin-bottom:8px}
+.dialog td{white-space:normal}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom));background:var(--text);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:60;font-weight:600;max-width:90vw}
+code,.mono{font-family:var(--mono);font-size:12.5px}
+pre{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px;overflow:auto;font-size:12px;line-height:1.5;max-height:340px}
+.drop{border:1.5px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--muted)}
+.drop.hover{border-color:var(--accent);color:var(--accent)}
+.split{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.small{font-size:12.5px}
+details summary{cursor:pointer;color:var(--muted);font-weight:600;padding:6px 0}
+.cmpt td:first-child{color:var(--muted)}
+@media (max-width: 1000px){ .fields{grid-template-columns:repeat(2,minmax(0,1fr))} .g3{grid-template-columns:1fr 1fr} }
+@media (max-width: 820px){
+  .shell{display:block}
+  nav.side{display:none}
+  main{padding:calc(14px + env(safe-area-inset-top)) max(14px, env(safe-area-inset-left)) calc(96px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-right))}
+  h1{font-size:21px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g2,.g3{grid-template-columns:1fr}
+  .kpi b{font-size:17px}
+  :root{--pad:14px}
+  .tabbar{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:40;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  .tabbar button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:var(--muted);padding:5px 0;font-weight:600;cursor:pointer}
+  .tabbar svg{width:22px;height:22px}
+  .tabbar button.on{color:var(--accent)}
+  .hide-m{display:none}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="side" id="side"></nav>
+  <main id="main"></main>
+</div>
+<nav class="tabbar" id="tabbar"></nav>
+<script>
+/* ===================== Sthir engine (pure logic, no DOM) ===================== */
+'use strict';
+
+const DEFAULTS = {
+  // capital & portfolio limits
+  capital: 1000000, riskPct: 0.20, maxPos: 5, maxAllocPct: 10, maxDeployPct: 50, maxOpenRiskPct: 1.0,
+  maxPerSector: 2, useCorr: true, corrMax: 0.80,
+  // stops & exits
+  atrMult: 2.0, exitMode: 'fixed', targetR: 2.0, trailMult: 3.0, maLen: 20, timeStop: 20, maxChaseATR: 1.0,
+  // eligibility
+  minPrice: 50, minADVcr: 5, participationPct: 2,
+  // execution costs
+  slipPct: 0.10, halfSpreadPct: 0.05, gapExtraPct: 0.25,
+  brokPct: 0, brokCap: 20, dpCharge: 15.93, sttPct: 0.1, stampPct: 0.015, exchPct: 0.00297, sebiPct: 0.0001, gstPct: 18,
+  // cash & tax
+  idleInterest: true, cashRatePct: 6.0, stcgPct: 20.8, slabPct: 31.2,
+  // strategy
+  strategy: 'pullback',
+  f_quality: true, f_regime: true, f_close50: true, f_50over200: true, f_200rising: true, f_pullback: true, f_confirm: true, f_rsi: true,
+  pbTolPct: 1.0, rsiLo: 45, rsiHi: 65, boLen: 55, boVolMult: 1.5, rsTopPct: 10,
+  // research splits
+  trainPct: 50, valPct: 25,
+  regimeSym: '', benchSym: '', exclude: ''
+};
+
+const STRATS = {
+  pullback: 'Trend pullback (your rules)',
+  breakout: 'Breakout + volume',
+  rs: 'Relative-strength momentum'
+};
+const EXITS = { fixed: 'Fixed stop + target', atr_trail: 'ATR trailing stop', ma: 'Moving-average exit' };
+
+const ENG = { DATA: null, IND: null, UNIV: [], REG: null, EXCL: new Set(), indKey: '' };
+
+/* ---------- CSV ---------- */
+function splitQuoted(line) {
+  const out = []; let f = '', q = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (q) { if (ch === '"') { if (line[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += ch; }
+    else if (ch === '"') q = true; else if (ch === ',') { out.push(f); f = ''; } else f += ch;
+  }
+  out.push(f); return out;
+}
+function parseCSV(text) {
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const lines = text.split(/\r?\n/), rows = [];
+  for (const ln of lines) { if (!ln.trim()) continue; rows.push(ln.indexOf('"') < 0 ? ln.split(',') : splitQuoted(ln)); }
+  return rows;
+}
+const MON = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+const p2 = n => (n < 10 ? '0' : '') + n;
+function parseDate(s) {
+  s = String(s || '').trim();
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if (m) return m[1] + '-' + p2(+m[2]) + '-' + p2(+m[3]);
+  m = s.match(/^(\d{1,2})[-\/ ]([A-Za-z]{3})[A-Za-z]*[-\/ ,]+(\d{2,4})$/);
+  if (m) { const y = m[3].length === 2 ? '20' + m[3] : m[3]; const mo = MON[m[2].toLowerCase()]; if (mo) return y + '-' + p2(mo) + '-' + p2(+m[1]); }
+  m = s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})/); if (m) return m[3] + '-' + p2(+m[2]) + '-' + p2(+m[1]); // DD-MM-YYYY (India)
+  m = s.match(/^(\d{4})(\d{2})(\d{2})$/); if (m) return m[1] + '-' + m[2] + '-' + m[3];
+  return null;
+}
+const num = s => { if (s == null) return NaN; const v = parseFloat(String(s).replace(/[,₹\s]/g, '')); return v; };
+function cleanSym(s) { return String(s || '').trim().toUpperCase().replace(/\.(NS|BO|NSE)$/, '').replace(/^\^/, ''); }
+
+/** Classify and parse one CSV file. Returns {kind, rows|map, note} */
+function parseFile(name, text) {
+  const rows = parseCSV(text); if (rows.length < 2) return { kind: 'empty', note: name + ': no rows' };
+  const hdr = rows[0].map(h => h.trim().toLowerCase().replace(/\s+/g, ' '));
+  const find = (...alts) => { for (const a of alts) { const i = hdr.findIndex(h => h === a); if (i >= 0) return i; } for (const a of alts) { const i = hdr.findIndex(h => h.includes(a)); if (i >= 0) return i; } return -1; };
+  const iSym = find('symbol', 'ticker', 'tradingsymbol', 'scrip'), iDate = find('date', 'timestamp', 'datetime');
+  const iSector = find('sector', 'industry');
+  const iFrom = find('from', 'start', 'added', 'included'), iTo = find('to', 'end', 'removed', 'excluded');
+  if (iSym >= 0 && iSector >= 0 && iDate < 0) {
+    const map = {}; for (let r = 1; r < rows.length; r++) { const s = cleanSym(rows[r][iSym]); if (s) map[s] = (rows[r][iSector] || '').trim() || 'Unknown'; }
+    return { kind: 'sectors', map, note: name + ': sector map for ' + Object.keys(map).length + ' symbols' };
+  }
+  if (iSym >= 0 && iFrom >= 0 && iDate < 0) {
+    const map = {}; let n = 0;
+    for (let r = 1; r < rows.length; r++) { const s = cleanSym(rows[r][iSym]); const f = parseDate(rows[r][iFrom]); const t = iTo >= 0 ? parseDate(rows[r][iTo]) : null; if (!s || !f) continue; (map[s] = map[s] || []).push([f, t || '9999-12-31']); n++; }
+    return { kind: 'membership', map, note: name + ': ' + n + ' membership ranges (point-in-time universe)' };
+  }
+  if (iDate < 0) return { kind: 'unknown', note: name + ': no Date column found — skipped' };
+  const iAdj = find('adj close', 'adj_close', 'adjclose');
+  let iC = hdr.findIndex(h => h === 'close' || h === 'close price' || h === 'closing price' || h === 'close_price');
+  if (iC < 0) iC = find('total returns index', 'tri', 'close', 'ltp', 'last');
+  const iO = find('open', 'open price'), iH = find('high', 'high price'), iL = find('low', 'low price');
+  const iV = find('volume', 'shares traded', 'tottrdqty', 'ttl_trd_qnty', 'qty');
+  const iSer = find('series');
+  if (iC < 0 && iAdj < 0) return { kind: 'unknown', note: name + ': no Close column — skipped' };
+  const stem = cleanSym(name.replace(/\.[^.]+$/, '').replace(/[^A-Za-z0-9&\-^._ ]/g, '').trim().replace(/\s+/g, ''));
+  const map = {}; let bad = 0;
+  for (let r = 1; r < rows.length; r++) {
+    const row = rows[r];
+    if (iSer >= 0) { const se = (row[iSer] || '').trim().toUpperCase(); if (se && se !== 'EQ' && se !== 'BE') continue; }
+    const d = parseDate(row[iDate]); if (!d) { bad++; continue; }
+    const sym = iSym >= 0 ? cleanSym(row[iSym]) : stem; if (!sym) { bad++; continue; }
+    let c = iC >= 0 ? num(row[iC]) : num(row[iAdj]);
+    let o = iO >= 0 ? num(row[iO]) : c, h = iH >= 0 ? num(row[iH]) : c, l = iL >= 0 ? num(row[iL]) : c;
+    if (iAdj >= 0 && iC >= 0) { const a = num(row[iAdj]); if (a > 0 && c > 0) { const k = a / c; o *= k; h *= k; l *= k; c = a; } }
+    if (!(o > 0)) o = c; if (!(h > 0)) h = Math.max(o, c); if (!(l > 0)) l = Math.min(o, c);
+    const v = iV >= 0 ? num(row[iV]) : NaN;
+    (map[sym] = map[sym] || []).push([d, o, h, l, c, v]);
+  }
+  const syms = Object.keys(map);
+  return { kind: 'prices', map, note: name + ': ' + syms.length + ' symbol(s), ' + (rows.length - 1) + ' rows' + (bad ? ', ' + bad + ' unreadable rows' : '') };
+}
+
+/* ---------- Dataset build & validation ---------- */
+const INDEX_RE = /NIFTY|NSEI|SENSEX|INDEX|TRI$|^CNX/i;
+function guessIndexSyms(keys) {
+  const reg = keys.find(k => /^(NIFTY ?50|NIFTY50|NSEI|NIFTY)$/i.test(k)) || keys.find(k => /NIFTY.?50/i.test(k) && !/TRI/i.test(k)) || keys.find(k => INDEX_RE.test(k)) || '';
+  const bench = keys.find(k => /200/.test(k) && /TRI/i.test(k)) || keys.find(k => /TRI/i.test(k)) || keys.find(k => /200/.test(k) && INDEX_RE.test(k)) || reg;
+  return { reg, bench };
+}
+
+function buildDataset(raw, extra) {
+  // raw: {SYM: [[d,o,h,l,c,v],...]}
+  const keys = Object.keys(raw);
+  const g = guessIndexSyms(keys);
+  const regSym = (extra.regimeSym && raw[extra.regimeSym]) ? extra.regimeSym : g.reg;
+  let dateSet;
+  if (regSym && raw[regSym] && raw[regSym].length > 300) dateSet = new Set(raw[regSym].map(r => r[0]));
+  else { dateSet = new Set(); for (const k of keys) for (const r of raw[k]) dateSet.add(r[0]); }
+  const dates = [...dateSet].sort(); const n = dates.length; const pos = new Map(dates.map((d, i) => [d, i]));
+  const syms = {}; const val = { issues: [], perSym: {}, totals: { dup: 0, ohlc: 0, offCal: 0, gaps: 0, zeroVol: 0, jumps: 0, stale: 0 } };
+  for (const k of keys) {
+    const arr = raw[k].slice().sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+    const o = new Float64Array(n).fill(NaN), h = new Float64Array(n).fill(NaN), l = new Float64Array(n).fill(NaN), c = new Float64Array(n).fill(NaN), v = new Float64Array(n).fill(NaN);
+    const st = { dup: 0, ohlc: 0, offCal: 0, gaps: 0, zeroVol: 0, jumps: 0 };
+    let prevD = null;
+    for (const r of arr) {
+      if (r[0] === prevD) { st.dup++; continue; } prevD = r[0];
+      const i = pos.get(r[0]); if (i === undefined) { st.offCal++; continue; }
+      let [, O, H, L, C, V] = r;
+      if (!(C > 0)) { st.ohlc++; continue; }
+      if (H < L || C > H * 1.001 || C < L * 0.999 || O > H * 1.001 || O < L * 0.999) { st.ohlc++; H = Math.max(O, H, L, C); L = Math.min(O, H, L, C); }
+      o[i] = O; h[i] = H; l[i] = L; c[i] = C; v[i] = V;
+    }
+    let first = -1, last = -1; for (let i = 0; i < n; i++) if (c[i] > 0) { if (first < 0) first = i; last = i; }
+    if (first < 0) continue;
+    let prev = NaN;
+    for (let i = first; i <= last; i++) {
+      if (!(c[i] > 0)) { st.gaps++; continue; }
+      if (v[i] === 0) st.zeroVol++;
+      if (prev > 0 && Math.abs(c[i] / prev - 1) > 0.30) st.jumps++;
+      prev = c[i];
+    }
+    const isIdx = INDEX_RE.test(k);
+    syms[k] = { o, h, l, c, v, first, last, isIndex: isIdx, sector: (extra.sectors && extra.sectors[k]) || '' };
+    val.perSym[k] = { ...st, first: dates[first], last: dates[last], bars: last - first + 1 - st.gaps };
+    for (const kk in st) val.totals[kk] += isIdx && kk === 'zeroVol' ? 0 : st[kk];
+    if (last < n - 1 && !isIdx) val.totals.stale++;
+  }
+  // issues summary
+  const T = val.totals, ps = val.perSym;
+  const nSyms = Object.keys(syms).length;
+  if (!regSym) val.issues.push(['bad', 'No Nifty 50 index series found. Regime filter cannot work and trading calendar is inferred from stock dates. Add a file with symbol NIFTY50.']);
+  if (T.jumps) val.issues.push(['warn', T.jumps + ' daily moves above 30% — possible unadjusted split/bonus. Check symbols flagged below; adjusted data is required.']);
+  if (T.ohlc) val.issues.push(['warn', T.ohlc + ' bars with inconsistent OHLC were repaired or dropped.']);
+  if (T.gaps) val.issues.push(['info', T.gaps + ' missing bars inside listed periods (suspensions or data gaps) — treated as untradeable days.']);
+  if (T.stale) val.issues.push(['info', T.stale + ' stocks stop before the last date (delisted, removed or stale data). They are force-exited at their last price in backtests.']);
+  if (T.dup) val.issues.push(['warn', T.dup + ' duplicate date rows ignored.']);
+  if (T.offCal) val.issues.push(['info', T.offCal + ' rows on dates not in the index calendar were ignored (holidays/bad dates).']);
+  if (!(extra.membership && Object.keys(extra.membership).length)) val.issues.push(['bad', 'No point-in-time constituent file. Backtest uses a fixed list → survivorship bias likely overstates results.']);
+  val.flagged = Object.keys(ps).filter(k => ps[k].jumps > 0).slice(0, 40);
+  return { dates, syms, sectors: extra.sectors || {}, membership: extra.membership || {}, synthetic: !!extra.synthetic, source: extra.source || 'upload', pubDate: extra.pubDate || '', regSym, benchSym: (extra.benchSym && syms[extra.benchSym]) ? extra.benchSym : g.bench, validation: val, nSyms, loadedAt: new Date().toISOString() };
+}
+
+/* ---------- Indicators ---------- */
+function sma(a, p) { const m = a.length, o = new Float64Array(m).fill(NaN); let s = 0; for (let i = 0; i < m; i++) { s += a[i]; if (i >= p) s -= a[i - p]; if (i >= p - 1) o[i] = s / p; } return o; }
+function ema(a, p) { const m = a.length, o = new Float64Array(m).fill(NaN); if (m < p) return o; let s = 0; for (let i = 0; i < p; i++) s += a[i]; let e = s / p; o[p - 1] = e; const k = 2 / (p + 1); for (let i = p; i < m; i++) { e = a[i] * k + e * (1 - k); o[i] = e; } return o; }
+function rsiW(c, p) { const m = c.length, o = new Float64Array(m).fill(NaN); if (m <= p) return o; let g = 0, l = 0; for (let i = 1; i <= p; i++) { const d = c[i] - c[i - 1]; if (d > 0) g += d; else l -= d; } g /= p; l /= p; o[p] = l === 0 ? 100 : 100 - 100 / (1 + g / l); for (let i = p + 1; i < m; i++) { const d = c[i] - c[i - 1]; g = (g * (p - 1) + (d > 0 ? d : 0)) / p; l = (l * (p - 1) + (d < 0 ? -d : 0)) / p; o[i] = l === 0 ? 100 : 100 - 100 / (1 + g / l); } return o; }
+function atrW(h, l, c, p) { const m = c.length, o = new Float64Array(m).fill(NaN); if (m <= p) return o; const tr = new Float64Array(m); tr[0] = h[0] - l[0]; for (let i = 1; i < m; i++) tr[i] = Math.max(h[i] - l[i], Math.abs(h[i] - c[i - 1]), Math.abs(l[i] - c[i - 1])); let s = 0; for (let i = 1; i <= p; i++) s += tr[i]; let a = s / p; o[p] = a; for (let i = p + 1; i < m; i++) { a = (a * (p - 1) + tr[i]) / p; o[i] = a; } return o; }
+
+function computeIndicators(P) {
+  const D = ENG.DATA; if (!D) return;
+  const key = P.boLen + '|' + P.maLen + '|' + D.loadedAt;
+  if (ENG.indKey === key && ENG.IND) return;
+  const n = D.dates.length; const IND = {};
+  for (const k in D.syms) {
+    const S = D.syms[k]; const idx = []; for (let i = 0; i < n; i++) if (S.c[i] > 0) idx.push(i);
+    const m = idx.length; const cc = new Float64Array(m), hh = new Float64Array(m), ll = new Float64Array(m), vv = new Float64Array(m);
+    for (let j = 0; j < m; j++) { const i = idx[j]; cc[j] = S.c[i]; hh[j] = S.h[i]; ll[j] = S.l[i]; vv[j] = S.v[i] > 0 ? S.v[i] : 0; }
+    const s50 = sma(cc, 50), s200 = sma(cc, 200), e20 = ema(cc, 20), eX = P.maLen === 20 ? e20 : ema(cc, P.maLen), r14 = rsiW(cc, 14), a14 = atrW(hh, ll, cc, 14);
+    const av = sma(vv, 20); const tv = new Float64Array(m); for (let j = 0; j < m; j++) tv[j] = cc[j] * vv[j]; const adv = sma(tv, 20);
+    const F = () => new Float32Array(n).fill(NaN);
+    const o = { sma50: F(), sma200: F(), sma200_20: F(), ema20: F(), emaX: F(), rsi: F(), atr: F(), avgV: F(), advVal: F(), zeroV: F(), big5: F(), hhN: F(), mom: F(), minLow3: F(), prevHigh: F(), sma20v: F() };
+    const N = P.boLen;
+    for (let j = 0; j < m; j++) {
+      const i = idx[j];
+      o.sma50[i] = s50[j]; o.sma200[i] = s200[j]; o.sma200_20[i] = j >= 20 ? s200[j - 20] : NaN; o.ema20[i] = e20[j]; o.emaX[i] = eX[j]; o.rsi[i] = r14[j]; o.atr[i] = a14[j];
+      o.avgV[i] = j >= 1 ? av[j - 1] : NaN; // average volume of previous 20 sessions (excludes today)
+      o.advVal[i] = adv[j];
+      let z = 0; if (j >= 19) { for (let q = j - 19; q <= j; q++) if (!(vv[q] > 0)) z++; o.zeroV[i] = z; }
+      let b = 0; if (j >= 5) { for (let q = j - 4; q <= j; q++) b = Math.max(b, Math.abs(cc[q] / cc[q - 1] - 1)); o.big5[i] = b; }
+      if (j >= N) { let mx = -Infinity; for (let q = j - N; q < j; q++) if (hh[q] > mx) mx = hh[q]; o.hhN[i] = mx; }
+      if (j >= 131) o.mom[i] = cc[j - 5] / cc[j - 131] - 1;
+      if (j >= 2) o.minLow3[i] = Math.min(ll[j], ll[j - 1], ll[j - 2]);
+      if (j >= 1) o.prevHigh[i] = hh[j - 1];
+    }
+    IND[k] = o;
+  }
+  ENG.IND = IND; ENG.indKey = key;
+  // regime
+  const R = { has: false, up: new Uint8Array(n), label: new Array(n).fill('') };
+  const rs = D.regSym && D.syms[D.regSym];
+  if (rs) {
+    R.has = true; const I = IND[D.regSym];
+    for (let i = 0; i < n; i++) {
+      const c = rs.c[i], s = I.sma200[i], s20 = I.sma200_20[i];
+      if (!(c > 0) || !(s > 0)) continue;
+      R.up[i] = c > s ? 1 : 0;
+      const rising = s20 > 0 ? s > s20 : null;
+      R.label[i] = (c > s && rising) ? 'bull' : (c < s && rising === false) ? 'bear' : 'side';
+    }
+  }
+  ENG.REG = R;
+  ENG.UNIV = Object.keys(D.syms).filter(k => !D.syms[k].isIndex && k !== D.regSym && k !== D.benchSym);
+}
+function setExclusions(txt) { ENG.EXCL = new Set(String(txt || '').toUpperCase().split(/[\s,;]+/).map(cleanSym).filter(Boolean)); }
+
+function isMember(sym, t) {
+  const M = ENG.DATA.membership; if (!M || !Object.keys(M).length) return true;
+  const r = M[sym]; if (!r) return false; const d = ENG.DATA.dates[t];
+  for (const [f, to] of r) if (d >= f && d <= to) return true; return false;
+}
+function weekKey(d) { return Math.floor((Date.parse(d + 'T00:00:00Z') / 86400000 + 3) / 7); }
+function isWeekStart(t) { const D = ENG.DATA.dates; return t === 0 || weekKey(D[t]) !== weekKey(D[t - 1]); }
+
+function rsRanks(t, P) {
+  const vals = [];
+  for (const k of ENG.UNIV) { const I = ENG.IND[k]; const m = I.mom[t]; if (Number.isFinite(m) && ENG.DATA.syms[k].c[t] > 0 && isMember(k, t)) vals.push([k, m]); }
+  vals.sort((a, b) => a[1] - b[1]); const out = new Map(); const L = vals.length;
+  vals.forEach(([k], i) => out.set(k, L > 1 ? i / (L - 1) : 0)); return out;
+}
+
+/* Check every rule for one stock on one day. All values use data up to and including day t only. */
+const CHECK_LABELS = {
+  data: '200+ bars of history', price: 'Price ≥ min', liquid: 'Liquidity (20d value, no zero-volume days)', tradable: 'Normal trading range today (not circuit-locked)',
+  noEvent: 'No >20% one-day move in last 5 days', member: 'Index member on this date', notExcluded: 'Not on your exclusion list (ASM/GSM etc.)',
+  regime: 'Nifty 50 above 200-day SMA', close50: 'Close > 50-day SMA', s50over200: '50-day SMA > 200-day SMA', s200rising: '200-day SMA rising (20 sessions)',
+  pullback: 'Pulled back to 20-day EMA', confirm: 'Close > previous day high', rsi: 'RSI(14) in band',
+  trend: 'Uptrend (price & 50-SMA above 200-SMA)', breakout: 'Close above prior N-day high', volume: 'Volume ≥ multiple of 20-day avg',
+  weekStart: 'First session of the week (rebalance day)', rsTop: 'Top relative strength (6-month momentum)'
+};
+const QUALITY_KEYS = ['price', 'liquid', 'tradable', 'noEvent'];
+
+function evalStock(sym, t, P, rsMap) {
+  const S = ENG.DATA.syms[sym], I = ENG.IND[sym]; const c = S.c[t];
+  if (!(c > 0)) return null;
+  const r = {};
+  r.data = I.sma200[t] > 0 && I.sma200_20[t] > 0 && I.atr[t] > 0;
+  r.price = c >= P.minPrice;
+  r.liquid = I.advVal[t] >= P.minADVcr * 1e7 && I.zeroV[t] === 0;
+  r.tradable = S.h[t] > S.l[t] && S.v[t] !== 0;
+  r.noEvent = !(I.big5[t] > 0.20);
+  r.member = isMember(sym, t);
+  r.notExcluded = !ENG.EXCL.has(sym);
+  r.regime = !ENG.REG.has || ENG.REG.up[t] === 1;
+  const req = ['data', 'member', 'notExcluded'];
+  if (P.f_quality) req.push(...QUALITY_KEYS);
+  if (P.f_regime) req.push('regime');
+  let score = 0;
+  if (P.strategy === 'pullback') {
+    const tol = P.pbTolPct / 100;
+    r.close50 = c > I.sma50[t]; r.s50over200 = I.sma50[t] > I.sma200[t]; r.s200rising = I.sma200[t] > I.sma200_20[t];
+    r.pullback = I.minLow3[t] <= I.ema20[t] * (1 + tol) && c >= I.ema20[t] * (1 - tol);
+    r.confirm = c > I.prevHigh[t];
+    r.rsi = I.rsi[t] >= P.rsiLo && I.rsi[t] <= P.rsiHi;
+    for (const [k, f] of [['close50', 'f_close50'], ['s50over200', 'f_50over200'], ['s200rising', 'f_200rising'], ['pullback', 'f_pullback'], ['confirm', 'f_confirm'], ['rsi', 'f_rsi']]) if (P[f]) req.push(k);
+    score = Number.isFinite(I.mom[t]) ? I.mom[t] : -1;
+  } else if (P.strategy === 'breakout') {
+    r.trend = c > I.sma200[t] && I.sma50[t] > I.sma200[t];
+    r.breakout = c > I.hhN[t];
+    r.volume = S.v[t] >= P.boVolMult * I.avgV[t] && I.avgV[t] > 0;
+    req.push('trend', 'breakout', 'volume');
+    score = I.avgV[t] > 0 ? S.v[t] / I.avgV[t] : 0;
+  } else {
+    r.weekStart = isWeekStart(t);
+    const pr = rsMap ? rsMap.get(sym) : undefined;
+    r.rsTop = pr !== undefined && pr >= 1 - P.rsTopPct / 100;
+    r.trend = c > I.sma50[t] && I.sma50[t] > I.sma200[t];
+    req.push('weekStart', 'rsTop', 'trend');
+    score = Number.isFinite(I.mom[t]) ? I.mom[t] : -1;
+  }
+  let pass = true; for (const k of req) if (!r[k]) { pass = false; break; }
+  return { r, req, pass, score };
+}
+
+/* ---------- Costs (Indian equity delivery) ---------- */
+function tradeCost(side, val, P) {
+  const br = P.brokPct > 0 ? Math.min(val * P.brokPct / 100, P.brokCap > 0 ? P.brokCap : Infinity) : 0;
+  const exch = val * P.exchPct / 100, sebi = val * P.sebiPct / 100, gst = (br + exch + sebi) * P.gstPct / 100;
+  const stt = val * P.sttPct / 100, stamp = side === 'buy' ? val * P.stampPct / 100 : 0, dp = side === 'sell' ? P.dpCharge : 0;
+  return br + exch + sebi + gst + stt + stamp + dp;
+}
+
+/* ---------- Position sizing (shared by backtest, scanner, paper) ---------- */
+function computeQty(px, atr, ctx, P) {
+  const stop = px - P.atrMult * atr; if (!(stop > 0) || !(atr > 0)) return { qty: 0, stop, rps: NaN, bind: 'invalid stop' };
+  const rps = px - stop, E = ctx.equity;
+  const lim = {
+    'risk budget': Math.floor(P.riskPct / 100 * E / rps),
+    'per-stock cap': Math.floor(P.maxAllocPct / 100 * E / px),
+    'deployment cap': Math.floor(Math.max(0, P.maxDeployPct / 100 * E - ctx.deployed) / px),
+    'open-risk cap': Math.floor(Math.max(0, P.maxOpenRiskPct / 100 * E - ctx.openRisk) / rps),
+    'cash': Math.floor(Math.max(0, ctx.cash - 1000) / (px * 1.003)),
+    'liquidity cap': ctx.avgV > 0 ? Math.floor(P.participationPct / 100 * ctx.avgV) : Infinity
+  };
+  let qty = Infinity, bind = ''; for (const k in lim) if (lim[k] < qty) { qty = lim[k]; bind = k; }
+  qty = Math.max(0, qty);
+  return { qty, stop, rps, bind, lim, partial: qty > 0 && bind !== 'risk budget' };
+}
+
+function corr60(a, b, t) {
+  const A = ENG.DATA.syms[a].c, B = ENG.DATA.syms[b].c; const xs = [], ys = [];
+  for (let i = Math.max(1, t - 60); i <= t; i++) { if (A[i] > 0 && A[i - 1] > 0 && B[i] > 0 && B[i - 1] > 0) { xs.push(A[i] / A[i - 1] - 1); ys.push(B[i] / B[i - 1] - 1); } }
+  const n = xs.length; if (n < 30) return 0;
+  let mx = 0, my = 0; for (let i = 0; i < n; i++) { mx += xs[i]; my += ys[i]; } mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0; for (let i = 0; i < n; i++) { const dx = xs[i] - mx, dy = ys[i] - my; sxy += dx * dy; sxx += dx * dx; syy += dy * dy; }
+  return sxx > 0 && syy > 0 ? sxy / Math.sqrt(sxx * syy) : 0;
+}
+
+/* ---------- Exit logic (shared) ---------- */
+// At the open of day t: returns {px, reason} if position exits, else null. Handles gaps and circuit locks.
+function exitAtOpen(p, t, P) {
+  const S = ENG.DATA.syms[p.sym]; const o = S.o[t], hi = S.h[t], lo = S.l[t];
+  if (!(o > 0)) return null; // no trading today (suspended / holiday for this stock)
+  const locked = hi === lo; // e.g. lower-circuit freeze: assume no sell fill
+  const sl = (P.slipPct + P.halfSpreadPct) / 100;
+  if (p.exitFlag && !(locked && o <= p.stop)) return { px: o * (1 - sl), reason: p.exitFlag };
+  if (o <= p.stop) { if (locked) { p.lockDays = (p.lockDays || 0) + 1; return null; } return { px: o * (1 - sl - P.gapExtraPct / 100), reason: 'Gap below stop' }; }
+  if (lo <= p.stop) return { px: p.stop * (1 - sl), reason: 'Stop hit' }; // stop assumed hit before target if both in same bar (conservative)
+  if (p.target && o >= p.target) return { px: o * (1 - sl), reason: 'Target (gap up)' };
+  if (p.target && hi >= p.target) return { px: p.target * (1 - sl), reason: 'Target hit' };
+  return null;
+}
+// At the close of day t: update trailing stop and set exit flags for next open.
+function updateAtClose(p, t, P) {
+  const S = ENG.DATA.syms[p.sym], I = ENG.IND[p.sym]; const c = S.c[t];
+  if (!(c > 0)) return;
+  p.last = c; p.bars++; p.hc = Math.max(p.hc || c, c);
+  if (P.exitMode === 'atr_trail' && I.atr[t] > 0) { const ns = p.hc - P.trailMult * I.atr[t]; if (ns > p.stop) p.stop = ns; }
+  if (P.exitMode === 'ma' && p.bars >= 3 && c < I.emaX[t]) p.exitFlag = p.exitFlag || ('Close below ' + P.maLen + '-EMA');
+  if (p.bars >= P.timeStop) p.exitFlag = p.exitFlag || 'Time stop';
+}
+
+/* ---------- Backtest ---------- */
+function backtest(P, s, e) {
+  const D = ENG.DATA; const syms = ENG.UNIV;
+  let cash = P.capital, interest = 0, turnover = 0, costs = 0;
+  const pos = []; let pending = []; const trades = []; const L = e - s + 1;
+  const eq = new Float64Array(L), invested = new Float64Array(L);
+  const skips = { 'gap-up skip': 0, 'limits/size': 0, 'sector cap': 0, 'correlation': 0, 'max positions': 0, 'locked/untradeable': 0, partial: 0 };
+  let prevE = cash; const sl = (P.slipPct + P.halfSpreadPct) / 100;
+  const closePos = (k, t, px, reason) => {
+    const p = pos[k]; const val = p.qty * px; const c = tradeCost('sell', val, P);
+    cash += val - c; costs += c; turnover += val;
+    const pnl = val - c - p.cost;
+    trades.push({ sym: p.sym, sector: p.sector, entryDate: D.dates[p.entryT], entry: p.entry, qty: p.qty, stop0: p.stop0, exitDate: D.dates[t], exit: px, reason, pnl, R: pnl / p.risk0, bars: p.bars, regime: p.regime, partial: p.partial, costs: p.buyCost + c, value: p.qty * p.entry });
+    pos.splice(k, 1);
+  };
+  for (let t = s; t <= e; t++) {
+    if (t > s && P.idleInterest && cash > 0) { const it = cash * (P.cashRatePct / 100) / 252; cash += it; interest += it; }
+    // 1) exits at the open
+    for (let k = pos.length - 1; k >= 0; k--) { const x = exitAtOpen(pos[k], t, P); if (x) closePos(k, t, x.px, x.reason); }
+    // 2) entries at the open (orders created at the previous close)
+    if (pending.length) {
+      const sectorCount = {}; for (const p of pos) sectorCount[p.sector] = (sectorCount[p.sector] || 0) + 1;
+      for (const od of pending) {
+        if (pos.length >= P.maxPos) { skips['max positions']++; continue; }
+        const S = D.syms[od.sym]; const o = S.o[t];
+        if (!(o > 0) || (S.h[t] === S.l[t])) { skips['locked/untradeable']++; continue; }
+        if (o > od.sigClose + P.maxChaseATR * od.atr) { skips['gap-up skip']++; continue; }
+        if (od.sector && P.maxPerSector > 0 && (sectorCount[od.sector] || 0) >= P.maxPerSector) { skips['sector cap']++; continue; }
+        if (P.useCorr && pos.some(p => corr60(p.sym, od.sym, t - 1) > P.corrMax)) { skips['correlation']++; continue; }
+        let deployed = 0, openRisk = 0; for (const p of pos) { deployed += p.qty * p.last; openRisk += p.qty * Math.max(0, p.last - p.stop); }
+        const px = o * (1 + sl);
+        const z = computeQty(px, od.atr, { equity: prevE, cash, deployed, openRisk, avgV: od.avgV }, P);
+        if (z.qty < 1) { skips['limits/size']++; continue; }
+        const val = z.qty * px, bc = tradeCost('buy', val, P);
+        cash -= val + bc; costs += bc; turnover += val;
+        const target = P.exitMode === 'fixed' && P.targetR > 0 ? px + P.targetR * z.rps : 0;
+        if (z.partial) skips.partial++;
+        pos.push({ sym: od.sym, sector: od.sector, entryT: t, entry: px, qty: z.qty, stop: z.stop, stop0: z.stop, target, risk0: z.qty * z.rps, cost: val + bc, buyCost: bc, bars: 0, last: px, hc: px, regime: ENG.REG.label[t - 1] || 'n/a', partial: z.partial ? z.bind : '' });
+        sectorCount[od.sector] = (sectorCount[od.sector] || 0) + 1;
+      }
+      pending = [];
+    }
+    // 3) mark to market at close, update stops / flags
+    for (let k = pos.length - 1; k >= 0; k--) { const p = pos[k]; updateAtClose(p, t, P); if (t >= D.syms[p.sym].last && t < e) closePos(k, t, p.last * (1 - sl), 'Data ended (delisted?)'); }
+    let mv = 0; for (const p of pos) mv += p.qty * p.last;
+    const E = cash + mv; eq[t - s] = E; invested[t - s] = E > 0 ? mv / E : 0; prevE = E;
+    // 4) signals at close → orders for next open
+    if (t < e && pos.length < P.maxPos) {
+      const held = new Set(pos.map(p => p.sym));
+      const rsMap = (P.strategy === 'rs' && isWeekStart(t)) ? rsRanks(t, P) : null;
+      if (P.strategy === 'rs' && !rsMap) { /* not a rebalance day */ }
+      else {
+        const cands = [];
+        for (const k of syms) {
+          if (held.has(k)) continue; const S = D.syms[k]; if (t < S.first + 200 || t > S.last) continue;
+          const ev = evalStock(k, t, P, rsMap); if (ev && ev.pass) cands.push({ sym: k, score: ev.score, sigClose: S.c[t], atr: ENG.IND[k].atr[t], avgV: ENG.IND[k].avgV[t], sector: S.sector || D.sectors[k] || '' });
+        }
+        cands.sort((a, b) => b.score - a.score); pending = cands.slice(0, P.maxPos * 3);
+      }
+    }
+  }
+  // close remaining at final close (marked as end of period)
+  for (let k = pos.length - 1; k >= 0; k--) { const p = pos[k]; closePos(k, e, p.last * (1 - sl), 'End of test period'); }
+  eq[L - 1] = cash;
+  return { s, e, dates: D.dates.slice(s, e + 1), eq, invested, trades, interest, turnover, costs, skips, P: { ...P } };
+}
+
+/* ---------- Metrics ---------- */
+function maxDD(eq) { let pk = -Infinity, dd = 0; for (const v of eq) { if (v > pk) pk = v; const d = v / pk - 1; if (d < dd) dd = d; } return dd; }
+function ddSeries(eq) { let pk = -Infinity; return Array.from(eq, v => { if (v > pk) pk = v; return v / pk - 1; }); }
+function yearsBetween(d0, d1) { return (Date.parse(d1) - Date.parse(d0)) / (365.25 * 86400000); }
+function fyOf(d) { const y = +d.slice(0, 4), m = +d.slice(5, 7); return m >= 4 ? y : y - 1; }
+function seriesStats(eq, dates, rf) {
+  const n = eq.length; const rets = []; for (let i = 1; i < n; i++) rets.push(eq[i] / eq[i - 1] - 1);
+  const yrs = Math.max(yearsBetween(dates[0], dates[n - 1]), 1 / 252);
+  const tot = eq[n - 1] / eq[0] - 1; const cagr = Math.pow(1 + tot, 1 / yrs) - 1;
+  const rfd = rf / 252; let m = 0; for (const r of rets) m += r - rfd; m /= Math.max(1, rets.length);
+  let v = 0, dv = 0; for (const r of rets) { const x = r - rfd; v += (x - m) ** 2; if (x < 0) dv += x * x; }
+  const sd = Math.sqrt(v / Math.max(1, rets.length - 1)), dsd = Math.sqrt(dv / Math.max(1, rets.length));
+  const dd = maxDD(eq);
+  return { tot, cagr, dd, sharpe: sd > 0 ? m / sd * Math.sqrt(252) : NaN, sortino: dsd > 0 ? m / dsd * Math.sqrt(252) : NaN, calmar: dd < 0 ? cagr / -dd : NaN, yrs, rets };
+}
+function tradeStats(tr) {
+  const n = tr.length; const w = tr.filter(x => x.pnl > 0), l = tr.filter(x => x.pnl <= 0);
+  const gw = w.reduce((a, x) => a + x.pnl, 0), gl = -l.reduce((a, x) => a + x.pnl, 0);
+  let streak = 0, worst = 0; for (const x of tr) { if (x.pnl <= 0) { streak++; worst = Math.max(worst, streak); } else streak = 0; }
+  const net = gw - gl;
+  const mR = n ? tr.reduce((a, x) => a + x.R, 0) / n : NaN; let vR = 0; for (const x of tr) vR += (x.R - mR) ** 2; const sdR = n > 1 ? Math.sqrt(vR / (n - 1)) : NaN;
+  return { n, wins: w.length, winRate: n ? w.length / n : NaN, pf: gl > 0 ? gw / gl : (gw > 0 ? Infinity : NaN), avgWin: w.length ? gw / w.length : NaN, avgLoss: l.length ? -gl / l.length : NaN, exp: n ? net / n : NaN, expR: n ? tr.reduce((a, x) => a + x.R, 0) / n : NaN, net, streak: worst, worstR: n ? Math.min(...tr.map(x => x.R)) : NaN, avgBars: n ? tr.reduce((a, x) => a + x.bars, 0) / n : NaN, tR: sdR > 0 ? mR / (sdR / Math.sqrt(n)) : NaN };
+}
+function benchSeries(sym, s, e) {
+  const S = ENG.DATA.syms[sym]; if (!S) return null; const out = new Float64Array(e - s + 1); let last = NaN;
+  for (let t = s; t <= e; t++) { if (S.c[t] > 0) last = S.c[t]; out[t - s] = last; }
+  let f = 0; while (f < out.length && !(out[f] > 0)) f++; if (f >= out.length) return null; for (let i = 0; i < f; i++) out[i] = out[f];
+  return out;
+}
+function metrics(res, P) {
+  const rf = P.cashRatePct / 100; const st = seriesStats(res.eq, res.dates, rf); const ts = tradeStats(res.trades);
+  const avgEq = res.eq.reduce((a, b) => a + b, 0) / res.eq.length;
+  const exposure = res.invested.reduce((a, b) => a + b, 0) / res.invested.length;
+  const turnoverPa = res.turnover / avgEq / st.yrs; // (buys + sells) / average equity, per year
+  // taxes: STCG on net realised gains per Indian FY; interest at slab
+  const byFY = {}; for (const x of res.trades) { const f = fyOf(x.exitDate); byFY[f] = (byFY[f] || 0) + x.pnl; }
+  let stcg = 0; for (const f in byFY) stcg += Math.max(0, byFY[f]) * P.stcgPct / 100;
+  const intTax = res.interest * P.slabPct / 100;
+  const endPost = res.eq[res.eq.length - 1] - stcg - intTax; const postCagr = Math.pow(endPost / res.eq[0], 1 / st.yrs) - 1;
+  // regime breakdown
+  const reg = {}; for (const lab of ['bull', 'side', 'bear']) reg[lab] = { days: 0, logr: 0, trades: [] };
+  for (let i = 1; i < res.eq.length; i++) { const lab = ENG.REG.label[res.s + i]; if (reg[lab]) { reg[lab].days++; reg[lab].logr += Math.log(res.eq[i] / res.eq[i - 1]); } }
+  for (const x of res.trades) if (reg[x.regime]) reg[x.regime].trades.push(x);
+  const regOut = {}; for (const lab in reg) { const r = reg[lab]; const tsr = tradeStats(r.trades); regOut[lab] = { days: r.days, annRet: r.days ? Math.exp(r.logr * 252 / r.days) - 1 : NaN, n: tsr.n, expR: tsr.expR, pf: tsr.pf, net: tsr.net }; }
+  // concentration: remove top 5 trades
+  const sorted = res.trades.slice().sort((a, b) => b.pnl - a.pnl); const rest = sorted.slice(5); const tsRest = tradeStats(rest);
+  const top5Share = ts.net !== 0 ? sorted.slice(0, 5).reduce((a, x) => a + x.pnl, 0) / Math.abs(ts.net) : NaN;
+  // rolling 12m
+  const roll = []; for (let i = 252; i < res.eq.length; i++) roll.push(res.eq[i] / res.eq[i - 252] - 1);
+  const rs = roll.slice().sort((a, b) => a - b);
+  const rollStats = roll.length ? { min: rs[0], med: rs[Math.floor(rs.length / 2)], max: rs[rs.length - 1], posShare: roll.filter(x => x > 0).length / roll.length } : null;
+  // benchmarks
+  let bench = null; if (ENG.DATA.benchSym) { const b = benchSeries(ENG.DATA.benchSym, res.s, res.e); if (b) bench = { sym: ENG.DATA.benchSym, series: b, ...seriesStats(b, res.dates, rf) }; }
+  const cashCagr = rf; const cashSeries = Float64Array.from(res.dates, (d, i) => P.capital * Math.pow(1 + rf, i / 252));
+  return { ...st, ...ts, exposure, turnoverPa, interest: res.interest, costs: res.costs, stcg, intTax, postCagr, endPost, regime: regOut, tsRest, top5Share, roll, rollStats, bench, cashCagr, cashSeries, skips: res.skips, start: res.dates[0], end: res.dates[res.dates.length - 1], endEq: res.eq[res.eq.length - 1] };
+}
+function gates(m) {
+  const enough = m.n >= 30;
+  const regs = ['bull', 'side', 'bear'].map(k => m.regime[k]).filter(r => r.n >= 8);
+  const regOK = regs.length >= 2 ? regs.filter(r => r.expR > 0).length >= Math.min(2, regs.length) && regs.every(r => r.expR > -0.25) : null;
+  return [
+    { name: 'Enough trades to judge (≥ 30)', val: String(m.n), pass: enough },
+    { name: 'Positive net return after all costs', val: (m.tot * 100).toFixed(2) + '%', pass: m.net > 0 },
+    { name: 'Profit factor > 1.3', val: Number.isFinite(m.pf) ? m.pf.toFixed(2) : '–', pass: enough ? m.pf > 1.3 : null },
+    { name: 'Max drawdown < 6%', val: (m.dd * 100).toFixed(2) + '%', pass: m.dd > -0.06 },
+    { name: 'Positive expectancy per trade', val: Number.isFinite(m.expR) ? m.expR.toFixed(2) + 'R' : '–', pass: enough ? m.expR > 0 : null },
+    { name: 'Edge distinguishable from luck (t-stat of R ≥ 2)', val: Number.isFinite(m.tR) ? m.tR.toFixed(2) : '–', pass: enough ? m.tR >= 2 : null },
+    { name: 'Works in ≥ 2 market regimes, no regime disaster', val: regs.length + ' regimes with ≥ 8 trades', pass: regOK },
+    { name: 'Still profitable without the 5 best trades', val: Number.isFinite(m.tsRest.net) ? Math.round(m.tsRest.net).toLocaleString('en-IN') : '–', pass: enough ? m.tsRest.net > 0 : null },
+    { name: 'Beats cash after tax (whole portfolio)', val: (m.postCagr * 100).toFixed(2) + '% vs ' + (m.cashCagr * 100 * 0.688).toFixed(2) + '%', pass: m.postCagr > m.cashCagr * (1 - 0.312) }
+  ];
+}
+
+/* ---------- Splits, walk-forward, ablation ---------- */
+function splits(P) {
+  const D = ENG.DATA; const n = D.dates.length;
+  let s0 = 0; const firstValid = []; for (const k of ENG.UNIV) firstValid.push(D.syms[k].first + 220);
+  firstValid.sort((a, b) => a - b); s0 = firstValid.length ? firstValid[Math.floor(firstValid.length * 0.3)] : 220; // when ~30% of universe has enough history
+  if (ENG.REG.has) s0 = Math.max(s0, D.syms[D.regSym].first + 220);
+  const usable = n - s0; const tr = Math.floor(usable * P.trainPct / 100), va = Math.floor(usable * P.valPct / 100);
+  return { train: [s0, s0 + tr - 1], val: [s0 + tr, s0 + tr + va - 1], test: [s0 + tr + va, n - 1], s0, usable };
+}
+const GRID = (() => { const g = []; for (const a of [1.5, 2, 3]) for (const x of ['fixed', 'atr_trail', 'ma']) g.push({ atrMult: a, exitMode: x }); return g; })();
+function wfScore(m) { if (m.n < 10) return -Infinity; return m.expR * Math.sqrt(m.n) - (m.dd < -0.06 ? 2 : 0); }
+async function walkForward(P, s0, e0, onProg) {
+  const trainLen = 756, testLen = 252; const wins = [];
+  for (let st = s0; st + trainLen + 60 <= e0; st += testLen) { const teS = st + trainLen, teE = Math.min(teS + testLen - 1, e0); if (teE - teS < 60) break; wins.push([st, teS - 1, teS, teE]); }
+  if (!wins.length) return { error: 'Need at least ~3.5 years of usable data before the holdout for walk-forward.' };
+  const out = []; const stitched = [P.capital]; const dates = [ENG.DATA.dates[wins[0][2]]]; const allTrades = []; let step = 0; const total = wins.length * (GRID.length + 1);
+  for (const [a, b, c, d] of wins) {
+    let best = null;
+    for (const g of GRID) { const Pg = { ...P, ...g }; const m = metrics(backtest(Pg, a, b), Pg); const sc = wfScore(m); if (!best || sc > best.sc) best = { g, sc, m }; step++; if (onProg) { onProg(step / total); await new Promise(r => setTimeout(r, 0)); } }
+    const Pt = { ...P, ...best.g }; const r = backtest(Pt, c, d); const m = metrics(r, Pt); step++;
+    for (let i = 1; i < r.eq.length; i++) { stitched.push(stitched[stitched.length - 1] * r.eq[i] / r.eq[i - 1]); dates.push(r.dates[i]); }
+    allTrades.push(...r.trades);
+    out.push({ train: [ENG.DATA.dates[a], ENG.DATA.dates[b]], test: [ENG.DATA.dates[c], ENG.DATA.dates[d]], chosen: best.g, trainExpR: best.m.expR, trainN: best.m.n, testRet: m.tot, testDD: m.dd, testN: m.n, testExpR: m.expR, testPF: m.pf });
+  }
+  const eq = Float64Array.from(stitched); const st = seriesStats(eq, dates, P.cashRatePct / 100); const ts = tradeStats(allTrades);
+  const chosenSet = new Set(out.map(w => w.chosen.atrMult + '/' + w.chosen.exitMode));
+  return { windows: out, eq, dates, ...st, ...ts, stability: chosenSet.size };
+}
+function ablation(P, s, e) {
+  const keys = P.strategy === 'pullback' ? ['f_regime', 'f_quality', 'f_close50', 'f_50over200', 'f_200rising', 'f_pullback', 'f_confirm', 'f_rsi'] : ['f_regime', 'f_quality'];
+  const rows = []; const base = metrics(backtest(P, s, e), P); rows.push({ name: 'All selected filters ON', m: base });
+  for (const k of keys) { if (!P[k]) continue; const Pk = { ...P, [k]: false }; rows.push({ name: 'Without: ' + FILTER_NAMES[k], m: metrics(backtest(Pk, s, e), Pk), key: k }); }
+  return rows;
+}
+const FILTER_NAMES = { f_quality: 'Liquidity/price/event filters', f_regime: 'Nifty > 200-SMA regime', f_close50: 'Close > 50-SMA', f_50over200: '50-SMA > 200-SMA', f_200rising: '200-SMA rising', f_pullback: 'Pullback to 20-EMA', f_confirm: 'Close > prior high', f_rsi: 'RSI band' };
+
+/* ---------- Paper trading replay (deterministic from approvals) ---------- */
+function replayPaper(PAPER, P) {
+  const D = ENG.DATA; const n = D.dates.length; const idx = new Map(D.dates.map((d, i) => [d, i]));
+  const res = { open: [], closed: [], pending: [], skipped: [], eq: [], eqDates: [], cash: PAPER.capital, peak: PAPER.capital };
+  const aps = (PAPER.approvals || []).filter(a => !(PAPER.cancelled || {})[a.id]).map(a => ({ ...a, t: idx.get(a.sigDate) })).filter(a => a.t !== undefined).sort((a, b) => a.t - b.t);
+  (PAPER.approvals || []).forEach(a => { if (!idx.has(a.sigDate)) res.skipped.push({ ...a, why: 'Signal date not in loaded data' }); });
+  if (!aps.length) return res;
+  let cash = PAPER.capital; const pos = []; const t0 = aps[0].t; const sl0 = (P.slipPct + P.halfSpreadPct) / 100;
+  const closeP = (k, t, px, reason) => { const p = pos[k]; const val = p.qty * px, c = tradeCost('sell', val, p.P); cash += val - c; const pnl = val - c - p.cost; res.closed.push({ ...p, exitDate: D.dates[t], exit: px, reason, pnl, R: pnl / p.risk0, costs: p.buyCost + c }); pos.splice(k, 1); };
+  for (let t = t0 + 1; t < n; t++) {
+    for (let k = pos.length - 1; k >= 0; k--) {
+      const p = pos[k]; const mc = (PAPER.closes || {})[p.id];
+      if (mc && mc.date <= D.dates[t]) { closeP(k, t, mc.price, 'Manual close'); continue; }
+      const x = exitAtOpen(p, t, p.P); if (x) closeP(k, t, x.px, x.reason);
+    }
+    for (const a of aps) {
+      if (a.t !== t - 1) continue;
+      const S = D.syms[a.sym]; if (!S) { res.skipped.push({ ...a, why: 'Symbol missing' }); continue; }
+      const Pa = { ...P, ...(a.params || {}) }; const sl = (Pa.slipPct + Pa.halfSpreadPct) / 100;
+      const o = S.o[t]; const ov = (PAPER.overrides || {})[a.id] || {};
+      if (!(o > 0)) { res.skipped.push({ ...a, why: 'No trading on next session' }); continue; }
+      if (!ov.entry && o > a.sigClose + Pa.maxChaseATR * a.atr) { res.skipped.push({ ...a, why: 'Opened too far above signal (gap-up rule) — not bought', date: D.dates[t], open: o }); continue; }
+      const px = ov.entry > 0 ? ov.entry : o * (1 + sl); const qty = ov.qty > 0 ? ov.qty : a.qty;
+      const stop = px - Pa.atrMult * a.atr; const rps = px - stop; const val = qty * px, bc = tradeCost('buy', val, Pa); cash -= val + bc;
+      pos.push({ id: a.id, sym: a.sym, sector: a.sector, strategy: a.strategy, entryDate: D.dates[t], entryT: t, entry: px, qty, stop, stop0: stop, target: Pa.exitMode === 'fixed' && Pa.targetR > 0 ? px + Pa.targetR * rps : 0, risk0: qty * rps, cost: val + bc, buyCost: bc, bars: 0, last: px, hc: px, P: Pa, note: a.note || '' });
+    }
+    for (let k = pos.length - 1; k >= 0; k--) { const p = pos[k]; updateAtClose(p, t, p.P); if (t >= D.syms[p.sym].last && t < n - 1) closeP(k, t, p.last * (1 - (p.P.slipPct + p.P.halfSpreadPct) / 100), 'Data ended (delisted?)'); }
+    let mv = 0; for (const p of pos) mv += p.qty * p.last;
+    res.eq.push(cash + mv); res.eqDates.push(D.dates[t]);
+  }
+  for (const a of aps) if (a.t === n - 1) res.pending.push(a);
+  res.open = pos; res.cash = cash; res.peak = Math.max(PAPER.capital, ...res.eq);
+  void sl0; return res;
+}
+
+/* ---------- Synthetic demo data (clearly labelled; random walks, no edge by construction) ---------- */
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function makeSynthetic(seed = 7, nStocks = 80, nDays = 2600) {
+  const rnd = mulberry32(seed); const gauss = () => { let u = 0, v = 0; while (u === 0) u = rnd(); while (v === 0) v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  const dates = []; let d = Date.UTC(2015, 0, 1); while (dates.length < nDays) { const wd = new Date(d).getUTCDay(); if (wd !== 0 && wd !== 6 && rnd() > 0.035) dates.push(new Date(d).toISOString().slice(0, 10)); d += 86400000; }
+  const R = { bull: [0.0006, 0.009], side: [0.0, 0.010], bear: [-0.0009, 0.017] }; let reg = 'bull'; const mret = [];
+  for (let i = 0; i < nDays; i++) { if (rnd() < 0.01) { const r = rnd(); reg = r < 0.5 ? 'bull' : r < 0.8 ? 'side' : 'bear'; } mret.push(R[reg][0] + R[reg][1] * gauss()); }
+  const sectors = ['Financials', 'IT', 'Energy', 'FMCG', 'Auto', 'Pharma', 'Metals', 'Capital Goods'];
+  const raw = {}; const sec = {}; let idx = 10000; const idxRows = [];
+  for (let i = 0; i < nDays; i++) { const o = idx * (1 + 0.002 * gauss()); idx *= 1 + mret[i]; const c = idx; idxRows.push([dates[i], o, Math.max(o, c) * (1 + Math.abs(gauss()) * 0.003), Math.min(o, c) * (1 - Math.abs(gauss()) * 0.003), c, 0]); }
+  raw['NIFTY50'] = idxRows;
+  for (let k = 0; k < nStocks; k++) {
+    const sym = 'SYN' + String(k + 1).padStart(3, '0'); sec[sym] = sectors[k % sectors.length];
+    const beta = 0.6 + rnd() * 0.8, sig = 0.011 + rnd() * 0.012; let p = 100 + rnd() * 2400; const baseV = 2e5 + rnd() * 3e6;
+    const start = k < 74 ? 0 : 900 + Math.floor(rnd() * 600); const end = k >= 4 && k < 7 ? 1200 + Math.floor(rnd() * 800) : nDays - 1;
+    const rows = [];
+    for (let i = 0; i < nDays; i++) {
+      const r = beta * mret[i] + sig * gauss(); const gap = 0.3 * r + 0.004 * gauss(); const o = p * (1 + gap); const c = p * (1 + r);
+      const h = Math.max(o, c) * (1 + Math.abs(gauss()) * sig * 0.5), l = Math.min(o, c) * (1 - Math.abs(gauss()) * sig * 0.5);
+      const v = Math.round(baseV * Math.exp(0.4 * gauss() + 8 * Math.abs(r)));
+      if (i >= start && i <= end) rows.push([dates[i], o, h, l, c, v]); p = c;
+    }
+    raw[sym] = rows;
+  }
+  return { raw, sectors: sec };
+}
+
+if (typeof module !== 'undefined') module.exports = { DEFAULTS, ENG, parseFile, buildDataset, computeIndicators, backtest, metrics, gates, splits, walkForward, ablation, replayPaper, makeSynthetic, evalStock, computeQty, tradeCost, setExclusions };
+
+/* ===================== Static content ===================== */
+const PY_SCRIPT = `# sthir_data.py — download daily NSE data for the Sthir app
+# Needs:  pip install yfinance pandas
+# Put ind_nifty200list.csv (from niftyindices.com) in the same folder, then:
+#   python sthir_data.py
+# Output: prices.csv (Date,Symbol,Open,High,Low,Close,Volume) and sectors.csv
+# NOTE: free Yahoo data, split/dividend-adjusted. Uses TODAY's Nifty 200 list,
+# so history has survivorship bias unless you also upload a membership file.
+import pandas as pd, yfinance as yf
+
+START = "2012-01-01"
+lst = pd.read_csv("ind_nifty200list.csv")
+lst.columns = [c.strip() for c in lst.columns]
+syms = lst["Symbol"].astype(str).str.strip().tolist()
+lst[["Symbol", "Industry"]].to_csv("sectors.csv", index=False)
+
+tickers = [s + ".NS" for s in syms] + ["^NSEI"]
+data = yf.download(tickers, start=START, auto_adjust=True, group_by="ticker",
+                   threads=True, progress=True)
+frames, missing = [], []
+for t in tickers:
+    try:
+        df = data[t].dropna(how="all")
+    except KeyError:
+        missing.append(t); continue
+    if df.empty:
+        missing.append(t); continue
+    df = df.reset_index()[["Date", "Open", "High", "Low", "Close", "Volume"]]
+    df["Symbol"] = "NIFTY50" if t == "^NSEI" else t[:-3]
+    frames.append(df)
+
+out = pd.concat(frames)
+out["Date"] = pd.to_datetime(out["Date"]).dt.strftime("%Y-%m-%d")
+out = out[["Date", "Symbol", "Open", "High", "Low", "Close", "Volume"]].round(2)
+out.to_csv("prices.csv", index=False)
+print(f"Saved {len(out):,} rows for {out.Symbol.nunique()} symbols")
+if missing:
+    print("No data for:", ", ".join(missing))
+`;
+
+const RESEARCH_HTML = `
+<p class="lead"><b>Short answer:</b> a conservative NSE cash-equity swing system can be built and run safely on ₹10 lakh, but with your risk limits it <b>cannot add much return</b> — realistically 0–3% a year on the whole portfolio <i>if</i> it has a real edge, and a small loss if it doesn't. Its main value is learning and discipline, not wealth creation. Whether any edge exists must be proven on clean data; it should not be assumed.</p>
+
+<div class="callout warn"><b>Nothing below is a backtest result.</b> The numbers are arithmetic from your own constraints and current Indian charges. Real results come only from the Backtest tab on real, survivorship-aware data.</div>
+
+<h3>1 · What your risk limits imply</h3>
+<p>Your rules risk 0.20% of capital (₹2,000) per trade. With a 2×ATR stop and a typical large-cap daily ATR of about 2–2.5%, the stop sits about 4–5% below entry. Position size is therefore about ₹2,000 ÷ 5% ≈ <b>₹40,000–50,000</b>, roughly 4–5% of capital.</p>
+<div class="tw"><table><thead><tr><th>Item</th><th class="n">Typical value</th><th>What it means</th></tr></thead><tbody>
+<tr><td>Position size</td><td class="n">₹40–50k</td><td>Well under your 10% per-stock cap</td></tr>
+<tr><td>5 positions deployed</td><td class="n">≈ 20–25%</td><td>You rarely reach the 50% deployment cap</td></tr>
+<tr><td>Average exposure over time</td><td class="n">≈ 8–20%</td><td>Signals are not always present; 5 slots are often not full</td></tr>
+<tr><td>Max open risk</td><td class="n">1% (₹10,000)</td><td>Five full stop-outs together cost about 1%</td></tr>
+<tr><td>Losing streak of 15 trades</td><td class="n">≈ −3% to −3.5%</td><td>Including costs; the 6% drawdown gate is mostly satisfied by small size, not by skill</td></tr>
+</tbody></table></div>
+<p>The strategy's contribution to annual return is approximately <b>trades per year × average R per trade × 0.20%</b>:</p>
+<div class="tw"><table><thead><tr><th>Edge (net, per trade)</th><th class="n">30 trades/yr</th><th class="n">50 trades/yr</th><th class="n">After 20.8% STCG</th></tr></thead><tbody>
+<tr><td>0.0R (no edge)</td><td class="n">0%</td><td class="n">0%</td><td class="n">0% (minus costs already counted)</td></tr>
+<tr><td>0.1R (weak)</td><td class="n">+0.6%</td><td class="n">+1.0%</td><td class="n">+0.5–0.8%</td></tr>
+<tr><td>0.2R (good)</td><td class="n">+1.2%</td><td class="n">+2.0%</td><td class="n">+1.0–1.6%</td></tr>
+<tr><td>0.3R (very good, rare)</td><td class="n">+1.8%</td><td class="n">+3.0%</td><td class="n">+1.4–2.4%</td></tr>
+</tbody></table></div>
+<p>The other 75–90% of capital sits in cash. In a liquid fund or T-bills it earns a few percent, taxed at your slab rate. So the realistic total is "liquid-fund return plus 0–2%", well below what large-cap equities have returned over long periods — but with far smaller drawdowns. That is a valid choice for capital preservation, but call it what it is.</p>
+
+<h3>2 · Transaction costs and tax</h3>
+<p>Current delivery charges: STT 0.1% on both buy and sell, stamp duty 0.015% on the buy, NSE transaction charge 0.00297%, SEBI ₹10 per crore, 18% GST on brokerage and exchange charges, and a DP charge of about ₹16 per sell. Many discount brokers charge zero brokerage on delivery.</p>
+<div class="tw"><table><thead><tr><th>Round trip on ₹40,000</th><th class="n">₹</th></tr></thead><tbody>
+<tr><td>Statutory charges + DP (zero brokerage)</td><td class="n">≈ 105</td></tr>
+<tr><td>Slippage + half-spread, 0.15% each side (assumption)</td><td class="n">≈ 120</td></tr>
+<tr><td><b>Total</b></td><td class="n"><b>≈ 225 (0.56%)</b></td></tr>
+<tr><td>As a fraction of ₹2,000 risk</td><td class="n"><b>≈ 0.11R</b></td></tr>
+</tbody></table></div>
+<p><b>Costs eat about 0.1R of every trade.</b> A strategy needs a gross edge above 0.1R just to break even. Tighter stops make it worse: a 1×ATR stop doubles the cost in R terms. Short-term gains are taxed at 20% plus cess, and only net gains within a financial year are taxed (losses offset gains).</p>
+
+<h3>3 · Strategy comparison</h3>
+<div class="tw"><table><thead><tr><th>Approach</th><th>Idea</th><th>Evidence base</th><th>Trade frequency</th><th>Main failure mode</th><th>Cost sensitivity</th></tr></thead><tbody>
+<tr><td><b>A · Trend pullback</b> (your rules)</td><td>Buy a dip to the 20-EMA inside an established uptrend</td><td>Weak to moderate. Trend persistence is documented, but buying short-term dips adds a mean-reversion bet whose edge in liquid large caps is small and often consumed by costs</td><td>Medium (8 filters stacked → few signals)</td><td>Many filters = high overfitting risk; dips in a turning market become falling knives; frequent small stop-outs</td><td>High (short holds, tight stops)</td></tr>
+<tr><td><b>B · Breakout + volume</b></td><td>Buy closes above a multi-week high on heavy volume</td><td>Moderate. Linked to the well-studied "52-week-high" and time-series momentum effects</td><td>Low–medium</td><td>False breakouts; buying after a gap-up raises slippage; poor in choppy markets</td><td>Medium</td></tr>
+<tr><td><b>C · Relative-strength momentum</b></td><td>Each week, hold the strongest 6-month performers that are in uptrends</td><td>Strongest of the three. Cross-sectional momentum is one of the most replicated anomalies globally and in India (NSE publishes momentum factor indices)</td><td>Low (weekly rebalance)</td><td>Momentum crashes at sharp market reversals (e.g. 2008, March 2020); needs a regime filter</td><td>Lower (longer holds)</td></tr>
+<tr><td><b>Baseline · Buy & hold index</b></td><td>Nifty 200 TRI / index fund</td><td>Market return</td><td>None</td><td>Deep drawdowns (30–60% historically)</td><td>Minimal</td></tr>
+<tr><td><b>Baseline · Cash</b></td><td>Liquid fund / T-bills</td><td>Near risk-free</td><td>None</td><td>Inflation and tax drag</td><td>None</td></tr>
+</tbody></table></div>
+<p><b>Prior expectation (to be tested, not believed):</b> C is most likely to survive out-of-sample, B second, A least — because A has the most parameters and the shortest holding period. The app runs all three on identical costs, limits and exits so the comparison is fair. Market-regime filtering and volatility-based sizing (stop = ATR multiple) are built into all of them.</p>
+
+<h3>4 · Biggest failure modes</h3>
+<ol>
+<li><b>Survivorship bias.</b> Testing on today's Nifty 200 means testing on companies that are known to have survived and grown. This alone can turn a losing strategy into a winning backtest. Fix: point-in-time membership file (NSE Indices publishes semi-annual rebalancing changes) and data that includes delisted stocks.</li>
+<li><b>Overfitting / multiple testing.</b> Eight filters, each with a threshold, give thousands of combinations. Some will look excellent by luck — on the synthetic random data in this app you will find settings that look "profitable". Fix: few parameters, chronological splits, walk-forward, an untouched holdout used once, and the t-stat gate.</li>
+<li><b>Small samples.</b> With 5 slots you may get 30–60 trades a year. Profit factor and win rate from fewer than ~100 trades have wide error bars. Fix: judge on several years and on R-expectancy with its t-statistic.</li>
+<li><b>Gap risk.</b> A stop is not a guarantee. Results, block deals, regulatory news or market shocks can open a stock 5–15% below your stop, and a lower-circuit stock may not be sellable at all. A single gap can cost 2–4R. The backtester sells at the gap open plus extra slippage and refuses fills on locked days.</li>
+<li><b>Regime dependence.</b> Long-only trend systems make most of their money in bull markets and bleed in sideways ones. Fix: regime filter and per-regime reporting; accept long periods in cash.</li>
+<li><b>Look-ahead bias.</b> Using the signal-day close as the entry price, or using data that was revised later. The engine only trades at the next open and computes indicators from past bars only.</li>
+<li><b>Data quality.</b> Free data has unadjusted splits/bonuses, gaps and stale symbols. Validation flags >30% one-day moves and missing bars, but cannot repair them.</li>
+<li><b>Costs and slippage underestimated.</b> Using zero slippage makes almost any short-term system look good. Run every candidate again with doubled costs; if it fails, it has no margin of safety.</li>
+<li><b>Behaviour.</b> Skipping signals after losses, closing winners early, or overriding stops destroys any small edge. The paper journal records manual overrides separately.</li>
+<li><b>Opportunity cost.</b> Being mostly in cash during a strong bull market feels bad and tempts rule changes. Decide in advance that you accept this.</li>
+</ol>
+
+<h3>5 · Data requirements</h3>
+<div class="tw"><table><thead><tr><th>Need</th><th>Good-enough for learning</th><th>Needed before real money</th></tr></thead><tbody>
+<tr><td>Adjusted daily OHLCV</td><td>Yahoo via the script in Setup</td><td>NSE bhavcopies with your own corporate-action adjustment, or a paid authorised vendor</td></tr>
+<tr><td>Point-in-time constituents</td><td>Not available free in a ready file</td><td>Build from NSE Indices rebalancing announcements (Symbol, From, To)</td></tr>
+<tr><td>Delisted / removed stocks</td><td>Missing from Yahoo</td><td>Paid vendor or NSE archives</td></tr>
+<tr><td>Benchmark</td><td>Nifty 50 price index (understates by the dividend yield)</td><td>Nifty 200 TRI from niftyindices.com</td></tr>
+<tr><td>Restrictions</td><td>Manual exclusion list (ASM/GSM/T2T)</td><td>Dated history of surveillance lists</td></tr>
+<tr><td>Cash benchmark</td><td>Fixed yield setting</td><td>Historical 91-day T-bill yields</td></tr>
+</tbody></table></div>
+
+<h3>6 · Acceptance criteria (stricter than your initial gates)</h3>
+<p>A strategy moves to paper trading only if <b>all</b> of these hold on Validation <i>and</i> on stitched walk-forward results, with costs as set:</p>
+<ul>
+<li>At least 100 out-of-sample trades in total.</li>
+<li>Net expectancy ≥ +0.15R per trade after all costs, with t-statistic ≥ 2.</li>
+<li>Profit factor > 1.3 out-of-sample.</li>
+<li>Maximum drawdown < 6% <i>and</i> still positive when slippage is doubled.</li>
+<li>Still profitable after removing the 5 best trades.</li>
+<li>Positive in at least two of bull / sideways / bear periods, and no catastrophic regime.</li>
+<li>Results do not collapse when the stop multiple or lookbacks are moved ±20% (no "cliff").</li>
+<li>Walk-forward picks similar settings in most years.</li>
+<li>Whole-portfolio post-tax return beats keeping everything in cash.</li>
+<li>The holdout is run once, at the end, and is not used to choose anything.</li>
+</ul>
+<p>Then at least 3–6 months of paper trading, with live fills compared against the backtest's assumptions, before any real money.</p>
+
+<h3>7 · What this app does and does not do</h3>
+<ul>
+<li>Runs entirely in your browser; nothing is fetched from the internet and no order can be sent anywhere.</li>
+<li>Daily bars only. Within one bar, if both the stop and the target are touched, it assumes the stop came first (conservative).</li>
+<li>Tax is an estimate per financial year; it ignores surcharge slabs and set-off against other income.</li>
+<li>Without a membership file and delisted-stock data, every backtest is biased upward. The app shows this warning until you fix it.</li>
+</ul>
+
+<h3>8 · Recommendation</h3>
+<p>Proceed to Phase 2 (exact rules) only on the understanding that the likely outcome is a <b>small, possibly zero</b> improvement over cash, and that rejecting all three strategies is an acceptable result. The rules are already encoded as editable defaults in this app so you can see them work. The next real step is data: get Nifty 200 history plus a point-in-time membership file, then run Compare → Test each filter → Walk-forward, and only then the holdout.</p>
+`;
+
+</script>
+<script>
+/* ===================== Sthir UI ===================== */
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const INR = (x, d = 0) => Number.isFinite(x) ? (x < 0 ? '−' : '') + '₹' + Math.abs(x).toLocaleString('en-IN', { maximumFractionDigits: d, minimumFractionDigits: d }) : '–';
+const PCT = (x, d = 1) => Number.isFinite(x) ? (x * 100).toFixed(d) + '%' : '–';
+const SPCT = (x, d = 1) => Number.isFinite(x) ? (x > 0 ? '+' : '') + (x * 100).toFixed(d) + '%' : '–';
+const N = (x, d = 2) => Number.isFinite(x) ? x.toFixed(d) : (x === Infinity ? '∞' : '–');
+const cls = x => x > 0 ? 'pos' : x < 0 ? 'neg' : '';
+const tick = b => b === true ? '<span class="pos">✓</span>' : b === false ? '<span class="neg">✗</span>' : '<span class="muted">–</span>';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const fmtDate = d => { if (!d) return '–'; const [y, m, dd] = d.split('-'); return dd + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][+m - 1] + ' ' + y; };
+
+let S = { ...DEFAULTS };
+let PAPER = { capital: DEFAULTS.capital, approvals: [], closes: {}, overrides: {}, notes: {}, cancelled: {} };
+let META = { holdoutRuns: 0, holdoutUnlocked: false, lastSummary: null, cloudData: null };
+let TAB = 'today', BT = null, CMP = null, ABL = null, WF = null, HOLD = null, BUSY = false, SCANALL = false, BTSEG = 'val';
+const CHARTS = {};
+
+/* ---------- local + cloud persistence ---------- */
+const LS = { get(k) { try { return JSON.parse(localStorage.getItem('sthir.' + k)); } catch { return null; } }, set(k, v) { try { localStorage.setItem('sthir.' + k, JSON.stringify(v)); } catch { } } };
+const CLOUD = { db: null, uid: null, assets: null, downloads: null, ready: false, chain: {}, timers: {} };
+function persist(name) {
+  const obj = name === 'settings' ? S : name === 'paper' ? PAPER : META;
+  LS.set(name, obj);
+  if (!CLOUD.db || !CLOUD.uid) return;
+  clearTimeout(CLOUD.timers[name]);
+  CLOUD.timers[name] = setTimeout(() => {
+    const body = JSON.parse(JSON.stringify(obj));
+    CLOUD.chain[name] = (CLOUD.chain[name] || Promise.resolve()).then(() => CLOUD.db.collection('data/users/' + CLOUD.uid).doc(name).set({ v: body, at: Date.now() })).catch(e => console.warn('cloud save', name, e && e.code));
+  }, 700);
+}
+async function initCloud() {
+  try {
+    if (!window.claude || !window.claude.use) return;
+    const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+    CLOUD.assets = await window.claude.use('assets').catch(() => null);
+    CLOUD.downloads = await window.claude.use('downloads').catch(() => null);
+    if (!db || !user) return;
+    const uid = await user.id(); if (!uid) return;
+    CLOUD.db = db; CLOUD.uid = uid;
+    const col = db.collection('data/users/' + uid);
+    const timeout = new Promise(r => setTimeout(() => r('timeout'), 10000));
+    const got = await Promise.race([Promise.all(['settings', 'paper', 'meta'].map(k => col.doc(k).get())), timeout]);
+    if (got === 'timeout') { toast('Cloud sync not reachable yet — using this device\'s copy'); return; }
+    const [s, p, m] = got;
+    if (s.exists && s.data().v) S = { ...DEFAULTS, ...s.data().v }; else persist('settings');
+    if (p.exists && p.data().v) PAPER = { ...PAPER, ...p.data().v }; else persist('paper');
+    if (m.exists && m.data().v) META = { ...META, ...m.data().v }; else persist('meta');
+    LS.set('settings', S); LS.set('paper', PAPER); LS.set('meta', META);
+    CLOUD.ready = true; setExclusions(S.exclude);
+    if (ENG.DATA) { ENG.indKey = ''; computeIndicators(S); }
+    render();
+  } catch (e) { console.warn('cloud init', e); }
+}
+
+/* ---------- IndexedDB for price data (per device) ---------- */
+function idb() { return new Promise((res, rej) => { const r = indexedDB.open('sthir', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+async function idbSet(k, v) { const d = await idb(); return new Promise((res, rej) => { const tx = d.transaction('kv', 'readwrite'); tx.objectStore('kv').put(v, k); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
+async function idbGet(k) { const d = await idb(); return new Promise((res, rej) => { const tx = d.transaction('kv', 'readonly'); const q = tx.objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); }
+
+function dataToRaw(D) {
+  const raw = {}; for (const k in D.syms) { const s = D.syms[k]; const rows = []; for (let i = s.first; i <= s.last; i++) if (s.c[i] > 0) rows.push([D.dates[i], s.o[i], s.h[i], s.l[i], s.c[i], s.v[i]]); raw[k] = rows; } return raw;
+}
+async function installDataset(raw, extra) {
+  ENG.DATA = buildDataset(raw, { ...extra, regimeSym: S.regimeSym, benchSym: S.benchSym });
+  ENG.indKey = ''; setExclusions(S.exclude); computeIndicators(S);
+  BT = CMP = ABL = WF = HOLD = null;
+  try { await idbSet('dataset', ENG.DATA); } catch (e) { toast('Could not save data on this device (storage full?)'); }
+}
+
+/* ---------- data published with the app (data/manifest.json) ---------- */
+let PUBMAN = null;
+async function fetchManifest() { try { const r = await fetch('data/manifest.json', { cache: 'no-store' }); if (!r.ok) return null; const m = await r.json(); return m && m.parts && m.parts.length ? m : null; } catch { return null; } }
+async function loadPublished(man) {
+  const parts = []; for (const f of man.parts) { const r = await fetch('data/' + f, { cache: 'no-store' }); if (!r.ok) throw new Error('missing ' + f); parts.push(await r.json()); }
+  const head = parts[0].head; const raw = {};
+  for (const p of parts) for (const k in p.syms) { const o = p.syms[k]; const rows = []; for (let j = 0; j < o.c.length; j++) if (o.c[j] > 0) rows.push([head.dates[o.f + j], o.o[j], o.h[j], o.l[j], o.c[j], o.v[j] == null ? NaN : o.v[j]]); raw[k] = rows; }
+  await installDataset(raw, { sectors: head.sectors || {}, membership: head.membership || {}, synthetic: false, source: 'published', pubDate: man.lastDate });
+}
+
+/* ---------- small UI helpers ---------- */
+function toast(msg, ms = 2600) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), ms); }
+function dialog(title, html, buttons) {
+  return new Promise(res => {
+    const ov = document.createElement('div'); ov.className = 'overlay';
+    ov.innerHTML = `<div class="dialog" role="dialog" aria-modal="true"><h2>${esc(title)}</h2><div>${html}</div><div class="row" style="justify-content:flex-end;margin-top:16px">${buttons.map((b, i) => `<button class="btn ${b.cls || ''}" data-i="${i}">${esc(b.label)}</button>`).join('')}</div></div>`;
+    ov.addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b) { const v = buttons[+b.dataset.i].val; const root = ov.querySelector('.dialog'); const vals = {}; root.querySelectorAll('[name]').forEach(x => vals[x.name] = x.type === 'checkbox' ? x.checked : x.value); ov.remove(); res({ v, vals }); } else if (e.target === ov) { ov.remove(); res({ v: null, vals: {} }); } });
+    document.body.appendChild(ov);
+  });
+}
+async function copyText(txt, what = 'Copied') { try { await navigator.clipboard.writeText(txt); toast(what); } catch { await dialog('Copy', `<p class="small muted">Select all and copy:</p><textarea style="height:220px" readonly>${esc(txt)}</textarea>`, [{ label: 'Done', cls: 'pri' }]); } }
+async function saveFile(filename, text, mime = 'text/csv') {
+  if (CLOUD.downloads) { try { await CLOUD.downloads.save({ filename, data: new Blob([text], { type: mime }) }); return; } catch (e) { if (e && e.code === 'cancelled') return; } }
+  copyText(text, 'Download not available here — copied to clipboard instead');
+}
+function toCSV(rows) { return rows.map(r => r.map(v => { const s = v == null ? '' : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(',')).join('\n'); }
+
+/* ---------- icons & nav ---------- */
+const IC = {
+  today: '<path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+  scan: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+  backtest: '<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-7"/>',
+  journal: '<path d="M6 3h11a2 2 0 012 2v16l-4-2-4 2-4-2-3 2V5a2 2 0 012-2z"/><path d="M9 8h6M9 12h6"/>',
+  research: '<path d="M4 19.5A2.5 2.5 0 016.5 17H20V3H6.5A2.5 2.5 0 004 5.5z"/><path d="M4 19.5A2.5 2.5 0 006.5 22H20v-5"/>',
+  setup: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/>'
+};
+const TABS = [['today', 'Today'], ['scan', 'Scanner'], ['backtest', 'Backtest'], ['journal', 'Journal'], ['research', 'Research'], ['setup', 'Setup']];
+const svgI = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${IC[k]}</svg>`;
+function renderNav() {
+  $('#side').innerHTML = `<div class="brand"><div class="mark">स्</div><div><b>Sthir</b><small>NSE swing research · paper only</small></div></div>` +
+    TABS.map(([k, l]) => `<button class="navbtn ${TAB === k ? 'on' : ''}" data-tab="${k}">${svgI(k)}${l}</button>`).join('') +
+    `<div class="foot">Never places live orders.<br>${CLOUD.db ? 'Journal synced to your account' : 'Saved on this device'}</div>`;
+  $('#tabbar').innerHTML = TABS.map(([k, l]) => `<button class="${TAB === k ? 'on' : ''}" data-tab="${k}">${svgI(k)}<span>${l}</span></button>`).join('');
+}
+function go(tab) { TAB = tab; try { if (location.hash !== '#' + tab) history.replaceState(null, '', '#' + tab); } catch { } render(); window.scrollTo(0, 0); }
+
+/* ---------- charts (lightweight SVG) ---------- */
+function niceStep(r) { const e = Math.pow(10, Math.floor(Math.log10(r))); const f = r / e; return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * e; }
+function chartSVG(sp, W) {
+  const H = sp.h || 230, pl = 58, pr = 10, pt = 10, pb = 24; const n = sp.dates.length;
+  const all = []; sp.series.forEach(s => { for (const v of s.vals) if (Number.isFinite(v)) all.push(v); });
+  if (!all.length || n < 2) return '<div class="empty">No data</div>';
+  let lo = Math.min(...all), hi = Math.max(...all); if (sp.zero) { lo = Math.min(lo, 0); hi = Math.max(hi, 0); } if (hi === lo) { hi += 1; lo -= 1; }
+  const pd = (hi - lo) * 0.05; if (!(sp.zero && hi === 0)) hi += pd; lo -= pd;
+  const X = i => pl + (W - pl - pr) * i / (n - 1), Y = v => pt + (H - pt - pb) * (1 - (v - lo) / (hi - lo));
+  const st = niceStep((hi - lo) / 4); let g = '';
+  for (let v = Math.ceil(lo / st) * st; v <= hi; v += st) { const y = Y(v); g += `<line x1="${pl}" x2="${W - pr}" y1="${y}" y2="${y}" style="stroke:var(--line)" stroke-width="1"/><text x="${pl - 6}" y="${y + 4}" text-anchor="end" font-size="11" style="fill:var(--faint)">${esc(sp.fmt ? sp.fmt(v) : v.toFixed(0))}</text>`; }
+  const yrs = []; for (let i = 1; i < n; i++) if (sp.dates[i].slice(0, 4) !== sp.dates[i - 1].slice(0, 4)) yrs.push(i);
+  const every = Math.max(1, Math.ceil(yrs.length / Math.max(1, Math.floor((W - pl) / 64))));
+  yrs.forEach((i, j) => { if (j % every) return; g += `<text x="${X(i)}" y="${H - 6}" text-anchor="middle" font-size="11" style="fill:var(--faint)">${sp.dates[i].slice(0, 4)}</text><line x1="${X(i)}" x2="${X(i)}" y1="${H - pb}" y2="${H - pb + 4}" style="stroke:var(--line)"/>`; });
+  if (!yrs.length) { g += `<text x="${pl}" y="${H - 6}" font-size="11" style="fill:var(--faint)">${fmtDate(sp.dates[0])}</text><text x="${W - pr}" y="${H - 6}" text-anchor="end" font-size="11" style="fill:var(--faint)">${fmtDate(sp.dates[n - 1])}</text>`; }
+  const stride = Math.max(1, Math.floor(n / (W * 1.5)));
+  for (const s of sp.series) {
+    let d = ''; let started = false;
+    for (let i = 0; i < n; i += stride) { const v = s.vals[i]; if (!Number.isFinite(v)) { started = false; continue; } d += (started ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(v).toFixed(1); started = true; }
+    if (s.area) g += `<path d="${d} L${X(n - 1 - ((n - 1) % stride))} ${Y(0)} L${X(0)} ${Y(0)} Z" style="fill:${s.color};opacity:.16"/>`;
+    g += `<path d="${d}" fill="none" style="stroke:${s.color}" stroke-width="${s.w || 1.8}" ${s.dash ? 'stroke-dasharray="4 4"' : ''} stroke-linejoin="round"/>`;
+  }
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
+}
+let chartSeq = 0;
+function chart(spec) { const id = 'c' + (++chartSeq); CHARTS[id] = spec; return `<div class="chart" id="${id}"></div>` + (spec.series.length > 1 || spec.legend ? `<div class="legend">${spec.series.map(s => `<span><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join('')}</div>` : ''); }
+function drawCharts() { for (const id in CHARTS) { const el = document.getElementById(id); if (!el) { delete CHARTS[id]; continue; } el.innerHTML = chartSVG(CHARTS[id], Math.max(280, el.clientWidth)); } }
+let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(drawCharts, 150); });
+
+/* ---------- derived state ---------- */
+function lastT() { return ENG.DATA ? ENG.DATA.dates.length - 1 : -1; }
+function regimeInfo(t) {
+  const D = ENG.DATA; if (!D || !ENG.REG.has) return null; const s = D.syms[D.regSym], I = ENG.IND[D.regSym];
+  return { sym: D.regSym, close: s.c[t], sma: I.sma200[t], dist: s.c[t] / I.sma200[t] - 1, up: ENG.REG.up[t] === 1, label: ENG.REG.label[t], rising: I.sma200[t] > I.sma200_20[t] };
+}
+function paperState() {
+  const rp = replayPaper(PAPER, S); const t = lastT();
+  let mv = 0, openRisk = 0, unreal = 0; for (const p of rp.open) { mv += p.qty * p.last; openRisk += p.qty * Math.max(0, p.last - p.stop); unreal += p.qty * p.last - p.cost; }
+  const equity = rp.cash + mv; const peak = Math.max(rp.peak, equity);
+  return { ...rp, mv, openRisk, unreal, equity, dd: equity / peak - 1, t };
+}
+function scanUniverse(t, P, all) {
+  const D = ENG.DATA; const out = []; const rsMap = P.strategy === 'rs' ? rsRanks(t, P) : null;
+  for (const k of ENG.UNIV) { const S2 = D.syms[k]; if (t > S2.last || t < S2.first) continue; const ev = evalStock(k, t, P, rsMap); if (!ev) continue; if (!all && !ev.pass) continue; out.push({ sym: k, ...ev, close: S2.c[t], atr: ENG.IND[k].atr[t], avgV: ENG.IND[k].avgV[t], sector: S2.sector || D.sectors[k] || '' }); }
+  out.sort((a, b) => (b.pass - a.pass) || (b.score - a.score)); return out;
+}
+function candidatesToday(ps) {
+  const t = ps.t; const sl = (S.slipPct + S.halfSpreadPct) / 100; const c = scanUniverse(t, S, false);
+  const heldOrPending = new Set([...ps.open.map(p => p.sym), ...ps.pending.map(p => p.sym)]);
+  const sectorCount = {}; [...ps.open, ...ps.pending].forEach(p => sectorCount[p.sector] = (sectorCount[p.sector] || 0) + 1);
+  let deployed = ps.mv, openRisk = ps.openRisk, cash = ps.cash, slots = S.maxPos - ps.open.length - ps.pending.length;
+  for (const p of ps.pending) { const est = p.sigClose * (1 + sl); deployed += p.qty * est; openRisk += p.qty * S.atrMult * p.atr; cash -= p.qty * est; }
+  return c.map(x => {
+    const px = x.close * (1 + sl); const z = computeQty(px, x.atr, { equity: ps.equity, cash, deployed, openRisk, avgV: x.avgV }, S);
+    let block = '';
+    if (heldOrPending.has(x.sym)) block = 'Already held / pending';
+    else if (slots <= 0) block = 'Max ' + S.maxPos + ' positions reached';
+    else if (x.sector && S.maxPerSector > 0 && (sectorCount[x.sector] || 0) >= S.maxPerSector) block = 'Sector limit (' + S.maxPerSector + ')';
+    else if (S.useCorr && ps.open.some(p => corr60(p.sym, x.sym, t) > S.corrMax)) block = 'Too correlated with a holding';
+    else if (z.qty < 1) block = 'Size is 0 (' + z.bind + ')';
+    return { ...x, estEntry: px, stop: z.stop, qty: z.qty, risk: z.qty * z.rps, value: z.qty * px, bind: z.bind, block, maxBuy: x.close + S.maxChaseATR * x.atr, target: S.exitMode === 'fixed' && S.targetR > 0 ? px + S.targetR * z.rps : 0 };
+  });
+}
+function exitRulesText(P, p) {
+  const parts = [`Stop ${INR(p.stop, 2)} — if price opens below it, sell at the open (gaps are not protected)`];
+  if (P.exitMode === 'fixed' && p.target) parts.push(`Target ${INR(p.target, 2)}`);
+  if (P.exitMode === 'atr_trail') parts.push(`Stop trails ${P.trailMult}×ATR below highest close; it only moves up`);
+  if (P.exitMode === 'ma') parts.push(`Sell next open if close < ${P.maLen}-day EMA (after 3 sessions)`);
+  parts.push(`Time stop after ${P.timeStop} sessions`);
+  return parts;
+}
+const EXIT_KEYS = ['atrMult', 'exitMode', 'targetR', 'trailMult', 'maLen', 'timeStop', 'maxChaseATR', 'slipPct', 'halfSpreadPct', 'gapExtraPct', 'brokPct', 'brokCap', 'dpCharge', 'sttPct', 'stampPct', 'exchPct', 'sebiPct', 'gstPct'];
+
+/* ---------- views ---------- */
+function noData() {
+  return `<div class="card prose"><h2>Start here</h2>
+  <p>Sthir needs daily price history for NSE stocks plus the Nifty 50 index. Nothing is fetched from the internet by this page — you load CSV files you download yourself.</p>
+  <ol><li><b>Try it now:</b> load the synthetic demo market (random data, no edge by design) to see how everything works.</li>
+  <li><b>Use real data:</b> go to <a href="#setup" data-tab="setup">Setup</a>, run the small Python download script on your PC, and upload the CSVs.</li></ol>
+  <div class="row">${PUBMAN ? `<button class="btn pri" data-act="loadpub">Load NSE data (${fmtDate(PUBMAN.lastDate)})</button>` : ''}<button class="btn ${PUBMAN ? '' : 'pri'}" data-act="demo">Load synthetic demo</button><button class="btn" data-tab="setup">Load my data</button></div></div>`;
+}
+function dataBanner() {
+  const D = ENG.DATA; if (!D) return '';
+  let h = '';
+  if (D.synthetic) h += `<div class="banner warn"><b>Synthetic demo data.</b> These prices are random walks generated in your browser. Every number shown is meaningless for real trading — use it only to learn the app.</div>`;
+  if (D.source === 'published' && PUBMAN && PUBMAN.lastDate > D.dates[D.dates.length - 1]) h += `<div class="banner info">Newer NSE data (to ${fmtDate(PUBMAN.lastDate)}) is available. <a href="#" data-act="loadpub">Load it</a></div>`;
+  const age = (Date.now() - Date.parse(D.dates[D.dates.length - 1])) / 86400000;
+  if (!D.synthetic && age > 4) h += `<div class="banner info">Latest data is from <b>${fmtDate(D.dates[D.dates.length - 1])}</b> (${Math.floor(age)} days old). Update your CSVs before acting on today's list.</div>`;
+  return h;
+}
+function viewToday() {
+  if (!ENG.DATA) return `<div class="top"><div><h1>Today</h1><div class="sub">Daily workflow · research & paper trading only</div></div></div>` + noData();
+  const ps = paperState(); const t = ps.t; const D = ENG.DATA; const ri = regimeInfo(t); const cands = candidatesToday(ps);
+  const ok = cands.filter(c => !c.block);
+  const regPill = ri ? `<span class="pill ${ri.up ? 'good' : 'bad'}"><span class="dot"></span>${ri.up ? 'Risk-on' : 'Risk-off'} · ${ri.label === 'bull' ? 'Bull' : ri.label === 'bear' ? 'Bear' : 'Sideways'}</span>` : `<span class="pill warn">No index data</span>`;
+  const dep = ps.mv / ps.equity, risk = ps.openRisk / ps.equity;
+  const kp = [
+    ['Paper equity', INR(ps.equity), SPCT(ps.equity / PAPER.capital - 1) + ' since start'],
+    ['Cash available', INR(ps.cash), PCT(ps.cash / ps.equity) + ' of equity'],
+    ['Invested', INR(ps.mv), PCT(dep) + ' · cap ' + S.maxDeployPct + '%'],
+    ['Unrealised P&L', `<span class="${cls(ps.unreal)}">${INR(ps.unreal)}</span>`, ps.open.length + ' open position' + (ps.open.length === 1 ? '' : 's')],
+    ['Drawdown', `<span class="${ps.dd < -0.03 ? 'neg' : ''}">${PCT(ps.dd, 2)}</span>`, 'from paper peak'],
+    ['Open risk to stops', INR(ps.openRisk), PCT(risk, 2) + ' · cap ' + S.maxOpenRiskPct + '%'],
+    ['Strategy', STRATS[S.strategy].split(' (')[0], EXITS[S.exitMode]],
+    ['Data as of', fmtDate(D.dates[t]), D.nSyms + ' series loaded']
+  ];
+  const steps = [
+    ['Data loaded & validated', true, D.validation.issues.filter(i => i[0] === 'bad').length + ' critical warnings'],
+    ['Indicators updated', true, 'SMA, EMA, RSI, ATR, volume'],
+    ['Market regime checked', !!ri, ri ? (ri.up ? 'Nifty above 200-SMA' : 'Nifty below 200-SMA — new entries blocked') : 'no index'],
+    ['Universe scanned', true, ENG.UNIV.length + ' stocks'],
+    ['Qualified signals', true, cands.length + ' passed all rules'],
+    ['Sized to risk budget', true, S.riskPct + '% risk per trade'],
+    ['Portfolio & sector limits', true, ok.length + ' still allowed'],
+    ['Daily report', true, '<a href="#" data-act="report">Copy report</a>'],
+    ['Waiting for your approval', 'wait', 'nothing is ever sent to a broker']
+  ];
+  let h = `<div class="top"><div><h1>Today</h1><div class="sub">Signals from the close of ${fmtDate(D.dates[t])} · act at the next session's open</div></div><div class="row">${regPill}<button class="btn sm" data-act="report">Copy daily report</button></div></div>`;
+  h += dataBanner();
+  h += `<div class="kpis">${kp.map(k => `<div class="kpi"><span>${k[0]}</span><b>${k[1]}</b><i>${k[2]}</i></div>`).join('')}</div>`;
+  // candidates
+  h += `<div class="card"><div class="split"><h2>New qualified candidates</h2><span class="tag">${STRATS[S.strategy]}</span></div>`;
+  if (ri && !ri.up && S.f_regime) h += `<div class="banner info" style="margin:0 0 10px">Regime filter is risk-off: the system stays in cash. That is the intended behaviour, not a malfunction.</div>`;
+  if (!cands.length) h += `<div class="empty">No stock passes every rule today. No trade is a valid outcome.</div>`;
+  else h += `<div class="tw"><table><thead><tr><th>Stock</th><th class="n">Signal close</th><th class="n">Est. entry</th><th class="n">Stop</th><th class="n">Qty</th><th class="n">Value</th><th class="n">Risk</th><th class="n">Skip if opens above</th><th></th></tr></thead><tbody>${cands.slice(0, 25).map(c => `<tr><td><b>${esc(c.sym)}</b><div class="small muted">${esc(c.sector || '—')}</div></td><td class="n">${INR(c.close, 2)}</td><td class="n">${INR(c.estEntry, 2)}</td><td class="n">${INR(c.stop, 2)}</td><td class="n">${c.qty}</td><td class="n">${INR(c.value)}</td><td class="n">${INR(c.risk)}<div class="small muted">${PCT(c.risk / ps.equity, 2)}</div></td><td class="n">${INR(c.maxBuy, 2)}</td><td>${c.block ? `<span class="small muted">${esc(c.block)}</span>` : `<button class="btn sm pri" data-act="approve" data-sym="${esc(c.sym)}">Approve (paper)</button>`}</td></tr>`).join('')}</tbody></table></div>`;
+  h += `<p class="small muted" style="margin:10px 0 0">Entry is estimated from the signal close; the real fill is the next open. Quantity uses risk ÷ (entry − stop), then the per-stock, deployment, open-risk, cash and liquidity caps — whichever is smallest.</p></div>`;
+  // pending + open
+  h += `<div class="grid g2"><div class="card"><h2>Open paper positions</h2>`;
+  if (!ps.open.length) h += `<div class="empty">No open positions.</div>`;
+  else h += ps.open.map(p => { const pl = p.qty * p.last - p.cost; return `<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div class="split"><b>${esc(p.sym)}</b><span class="${cls(pl)} num">${INR(pl)} (${SPCT(p.last / p.entry - 1)})</span></div><div class="small muted num">${p.qty} @ ${INR(p.entry, 2)} · last ${INR(p.last, 2)} · day ${p.bars}/${p.P.timeStop}${p.exitFlag ? ` · <span class="warnc">Exit at next open: ${esc(p.exitFlag)}</span>` : ''}</div><ul class="small" style="margin:6px 0 0;padding-left:18px">${exitRulesText(p.P, p).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`; }).join('');
+  h += `</div><div class="card"><h2>Approved — fill at next open</h2>`;
+  if (!ps.pending.length) h += `<div class="empty">Nothing waiting.</div>`;
+  else h += `<div class="tw"><table><tbody>${ps.pending.map(a => `<tr><td><b>${esc(a.sym)}</b><div class="small muted">signal ${fmtDate(a.sigDate)}</div></td><td class="n">${a.qty} sh</td><td class="n small">skip if opens &gt; ${INR(a.sigClose + S.maxChaseATR * a.atr, 2)}</td><td><button class="btn sm danger" data-act="cancel" data-id="${a.id}">Cancel</button></td></tr>`).join('')}</tbody></table></div>`;
+  h += `</div></div>`;
+  // workflow + regime + history
+  h += `<div class="grid g3"><div class="card"><h2>Daily workflow</h2><ul class="steps">${steps.map(s => `<li class="${s[1] === true ? 'ok' : s[1] === 'wait' ? 'wait' : ''}"><span class="ic">${s[1] === true ? '✓' : s[1] === 'wait' ? '…' : '!'}</span><div><div>${s[0]}</div><div class="small muted">${s[2]}</div></div></li>`).join('')}</ul></div>`;
+  h += `<div class="card"><h2>Market regime</h2>${ri ? `<div class="kpi" style="border:0;padding:0"><span>${esc(ri.sym)} close</span><b>${ri.close.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</b><i>${SPCT(ri.dist)} vs 200-day SMA (${ri.sma.toLocaleString('en-IN', { maximumFractionDigits: 0 })}) · SMA ${ri.rising ? 'rising' : 'falling'}</i></div>` + chart({ dates: D.dates.slice(-260), series: [{ name: ri.sym, vals: Array.from(D.syms[ri.sym].c.slice(-260)), color: 'var(--text)', w: 1.5 }, { name: '200-day SMA', vals: Array.from(ENG.IND[ri.sym].sma200.slice(-260)), color: 'var(--warn)', dash: true }], h: 170, fmt: v => (v / 1000).toFixed(1) + 'k' }) : '<div class="empty">Load a NIFTY50 series to enable the regime filter.</div>'}</div>`;
+  const L = META.lastSummary;
+  h += `<div class="card"><h2>Historical strategy performance</h2>${L ? `<div class="small muted" style="margin-bottom:8px">${esc(L.label)} · ${fmtDate(L.start)} → ${fmtDate(L.end)}${L.synthetic ? ' · <span class="warnc">synthetic data</span>' : ''}</div><table class="cmpt"><tbody>${[['Net return', SPCT(L.tot)], ['CAGR', PCT(L.cagr, 2)], ['Max drawdown', PCT(L.dd, 2)], ['Profit factor', N(L.pf)], ['Expectancy', N(L.expR) + 'R'], ['Trades', L.n], ['Gates passed', L.gates]].map(r => `<tr><td>${r[0]}</td><td class="n">${r[1]}</td></tr>`).join('')}</tbody></table>` : `<div class="empty">Run a backtest to see results here.</div><div class="row" style="justify-content:center"><button class="btn sm" data-tab="backtest">Open backtester</button></div>`}</div></div>`;
+  return h;
+}
+
+function viewScan() {
+  if (!ENG.DATA) return `<div class="top"><h1>Scanner</h1></div>` + noData();
+  const t = lastT(); const rows = scanUniverse(t, S, true); const pass = rows.filter(r => r.pass);
+  const req = rows.length ? rows[0].req : [];
+  const funnel = []; let alive = rows.slice(); for (const k of req) { alive = alive.filter(r => r.r[k]); funnel.push([k, alive.length]); }
+  let h = `<div class="top"><div><h1>Scanner</h1><div class="sub">Every rule checked for every stock at the close of ${fmtDate(ENG.DATA.dates[t])}</div></div>${stratSeg()}</div>` + dataBanner();
+  h += `<div class="card"><h2>Rule funnel</h2><div class="small muted" style="margin-bottom:8px">Stocks remaining after each rule, in order. Shows which rules do the filtering.</div>${funnel.map(([k, c]) => `<div style="margin:8px 0"><div class="split small"><span>${esc(CHECK_LABELS[k])}</span><b class="num">${c}</b></div><div class="bar"><div style="width:${rows.length ? c / rows.length * 100 : 0}%"></div></div></div>`).join('')}</div>`;
+  const show = SCANALL ? rows.slice(0, 300) : pass;
+  h += `<div class="card"><div class="split"><h2>${SCANALL ? 'All stocks' : 'Passing stocks'} <span class="muted">(${show.length})</span></h2><div class="seg"><button class="${!SCANALL ? 'on' : ''}" data-act="scanall" data-v="0">Passing</button><button class="${SCANALL ? 'on' : ''}" data-act="scanall" data-v="1">All</button></div></div>`;
+  h += show.length ? `<div class="tw"><table><thead><tr><th>Stock</th><th class="n">Close</th>${req.map(k => `<th title="${esc(CHECK_LABELS[k])}">${esc(shortKey(k))}</th>`).join('')}<th class="n">Rank score</th></tr></thead><tbody>${show.map(r => `<tr><td><b>${esc(r.sym)}</b></td><td class="n">${INR(r.close, 2)}</td>${req.map(k => `<td>${tick(r.r[k])}</td>`).join('')}<td class="n">${N(r.score, 3)}</td></tr>`).join('')}</tbody></table></div>` : `<div class="empty">No stock passes all rules today.</div>`;
+  h += `<p class="small muted">Column key: ${req.map(k => `<b>${esc(shortKey(k))}</b> = ${esc(CHECK_LABELS[k])}`).join(' · ')}</p></div>`;
+  return h;
+}
+const SHORT = { data: 'Hist', price: 'Price', liquid: 'Liq', tradable: 'Range', noEvent: 'Event', member: 'Member', notExcluded: 'Allowed', regime: 'Regime', close50: '>50', s50over200: '50>200', s200rising: '200↑', pullback: 'Pullbk', confirm: 'Conf', rsi: 'RSI', trend: 'Trend', breakout: 'Break', volume: 'Vol', weekStart: 'Week', rsTop: 'RS top' };
+const shortKey = k => SHORT[k] || k;
+function stratSeg() { return `<div class="seg">${Object.keys(STRATS).map(k => `<button class="${S.strategy === k ? 'on' : ''}" data-act="setv" data-k="strategy" data-v="${k}">${esc(STRATS[k].split(' (')[0])}</button>`).join('')}</div>`; }
+function exitSeg() { return `<div class="seg">${Object.keys(EXITS).map(k => `<button class="${S.exitMode === k ? 'on' : ''}" data-act="setv" data-k="exitMode" data-v="${k}">${esc(EXITS[k])}</button>`).join('')}</div>`; }
+
+function numField(k, label, step = 'any', extra = '') { return `<div class="field"><label>${label}</label><input type="number" inputmode="decimal" step="${step}" data-set="${k}" value="${esc(S[k])}" ${extra}></div>`; }
+function chkField(k, label, sub = '') { return `<label class="chk"><input type="checkbox" data-set="${k}" ${S[k] ? 'checked' : ''}><span>${label}${sub ? `<div class="small muted">${sub}</div>` : ''}</span></label>`; }
+
+function metricTable(cols) {
+  // cols: [{name, m}]
+  const rows = [
+    ['Net return', m => `<span class="${cls(m.tot)}">${SPCT(m.tot, 2)}</span>`], ['CAGR', m => PCT(m.cagr, 2)], ['Post-tax CAGR (est.)', m => PCT(m.postCagr, 2)], ['Max drawdown', m => PCT(m.dd, 2)],
+    ['Sharpe (vs cash)', m => N(m.sharpe)], ['Sortino', m => N(m.sortino)], ['Calmar', m => N(m.calmar)],
+    ['Trades', m => m.n], ['Win rate', m => PCT(m.winRate)], ['Profit factor', m => N(m.pf)], ['Avg win / loss', m => INR(m.avgWin) + ' / ' + INR(m.avgLoss)],
+    ['Expectancy / trade', m => INR(m.exp) + ' · ' + N(m.expR) + 'R'], ['t-stat of R', m => N(m.tR)], ['Trading P&L (ex-interest)', m => `<span class="${cls(m.net)}">${INR(m.net)}</span>`], ['Interest on idle cash', m => INR(m.interest)],
+    ['Costs paid', m => INR(m.costs)], ['Avg exposure', m => PCT(m.exposure)], ['Turnover / yr', m => N(m.turnoverPa, 1) + '×'], ['Longest losing streak', m => m.streak], ['Worst trade', m => N(m.worstR) + 'R'],
+    ['Rolling 12m: worst / median', m => m.rollStats ? SPCT(m.rollStats.min) + ' / ' + SPCT(m.rollStats.med) : '–'],
+    ['Benchmark return (B&H)', m => m.bench ? SPCT(m.bench.tot, 1) + ' · DD ' + PCT(m.bench.dd, 1) : '–'], ['Cash benchmark CAGR', m => PCT(m.cashCagr, 2)]
+  ];
+  return `<div class="tw"><table class="cmpt"><thead><tr><th></th>${cols.map(c => `<th class="n">${esc(c.name)}<div class="small muted" style="font-weight:400">${c.m ? fmtDate(c.m.start).slice(3) + ' – ' + fmtDate(c.m.end).slice(3) : ''}</div></th>`).join('')}</tr></thead><tbody>${rows.map(([l, f]) => `<tr><td>${l}</td>${cols.map(c => `<td class="n">${c.m ? f(c.m) : '<span class="muted">locked</span>'}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+function gateList(m) { return `<ul class="steps">${gates(m).map(g => `<li class="${g.pass === true ? 'ok' : ''}"><span class="ic" style="${g.pass === false ? 'border-color:var(--bad);color:var(--bad)' : ''}">${g.pass === true ? '✓' : g.pass === false ? '✗' : '?'}</span><div><div>${esc(g.name)}</div><div class="small muted">${esc(g.val)}${g.pass === null ? ' · not enough evidence' : ''}</div></div></li>`).join('')}</ul>`; }
+
+function viewBacktest() {
+  if (!ENG.DATA) return `<div class="top"><h1>Backtest</h1></div>` + noData();
+  const sp = splits(S); const D = ENG.DATA;
+  let h = `<div class="top"><div><h1>Backtest & research</h1><div class="sub">Event-driven daily simulation · next-day-open entries · Indian delivery costs · gap & circuit handling</div></div></div>` + dataBanner();
+  if (!Object.keys(D.membership).length) h += `<div class="banner bad"><b>Survivorship bias warning.</b> No point-in-time constituent file is loaded, so history is tested on a list chosen with hindsight. Treat results as optimistic. Add a membership CSV in Setup.</div>`;
+  h += `<div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Strategy</h2>${stratSeg()}</div><div class="row" style="margin-top:12px;justify-content:space-between"><h2 style="margin:0">Exit method</h2>${exitSeg()}</div>
+  <div class="fields" style="margin-top:14px">${numField('atrMult', 'Initial stop (× ATR)', '0.1')}${S.exitMode === 'fixed' ? numField('targetR', 'Target (R multiple, 0 = none)', '0.5') : S.exitMode === 'atr_trail' ? numField('trailMult', 'Trail distance (× ATR)', '0.5') : numField('maLen', 'Exit EMA length', '1')}${numField('timeStop', 'Time stop (sessions)', '1')}${numField('maxChaseATR', 'Skip if gap-up > × ATR', '0.25')}</div>
+  ${S.strategy === 'pullback' ? `<h3>Pullback filters — switch any off to test it</h3><div class="grid g2" style="gap:0 14px">${chkField('f_regime', 'Nifty 50 above 200-day SMA')}${chkField('f_quality', 'Liquidity, price & event filters')}${chkField('f_close50', 'Close above 50-day SMA')}${chkField('f_50over200', '50-day SMA above 200-day SMA')}${chkField('f_200rising', '200-day SMA rising over 20 sessions')}${chkField('f_pullback', 'Pullback to 20-day EMA', 'Low of last 3 sessions within ' + S.pbTolPct + '% of the EMA')}${chkField('f_confirm', 'Close above previous day high')}${chkField('f_rsi', 'RSI(14) between ' + S.rsiLo + ' and ' + S.rsiHi)}</div>` : `<div class="grid g2" style="gap:0 14px;margin-top:8px">${chkField('f_regime', 'Nifty 50 above 200-day SMA')}${chkField('f_quality', 'Liquidity, price & event filters')}</div>`}
+  <h3>Chronological split</h3><div class="small"><span class="tag">Train</span> ${fmtDate(D.dates[sp.train[0]])} → ${fmtDate(D.dates[sp.train[1]])} &nbsp; <span class="tag">Validation</span> ${fmtDate(D.dates[sp.val[0]])} → ${fmtDate(D.dates[sp.val[1]])} &nbsp; <span class="tag">Holdout test</span> ${fmtDate(D.dates[sp.test[0]])} → ${fmtDate(D.dates[sp.test[1]])} ${META.holdoutUnlocked ? `<span class="warnc">(opened ${META.holdoutRuns}×)</span>` : '🔒'}</div>
+  <div class="prog" id="prog"><div></div></div>
+  <div class="row"><button class="btn pri" data-act="run" ${BUSY ? 'disabled' : ''}>Run train + validation</button><button class="btn" data-act="compare" ${BUSY ? 'disabled' : ''}>Compare 3 strategies</button><button class="btn" data-act="ablate" ${BUSY ? 'disabled' : ''}>Test each filter</button><button class="btn" data-act="wf" ${BUSY ? 'disabled' : ''}>Walk-forward</button><button class="btn" data-act="holdout" ${BUSY ? 'disabled' : ''}>Holdout test ${META.holdoutUnlocked ? '' : '🔒'}</button></div></div>`;
+  if (BT) {
+    const segs = [{ name: 'Train', m: BT.train.m, r: BT.train.r }, { name: 'Validation', m: BT.val.m, r: BT.val.r }]; if (HOLD) segs.push({ name: 'Holdout', m: HOLD.m, r: HOLD.r });
+    const cur = segs.find(s => s.name.toLowerCase().startsWith(BTSEG)) || segs[1]; const m = cur.m, r = cur.r;
+    h += `<div class="card"><div class="split"><h2>Results · ${esc(STRATS[BT.P.strategy])} · ${esc(EXITS[BT.P.exitMode])}</h2></div>${metricTable(segs)}<p class="small muted">Post-tax estimate: STCG ${BT.P.stcgPct}% on each financial year's net realised gains, interest taxed at ${BT.P.slabPct}%. ${BT.P.idleInterest ? 'Idle cash earns ' + BT.P.cashRatePct + '% (liquid fund / T-bill proxy) — this is most of the return; look at "Trading P&L" for the strategy itself.' : ''}</p></div>`;
+    h += `<div class="card"><div class="split"><h2>Equity · ${esc(cur.name)}</h2><div class="seg">${segs.map(s => `<button class="${s === cur ? 'on' : ''}" data-act="seg" data-v="${s.name.toLowerCase().slice(0, 3)}">${s.name}</button>`).join('')}</div></div>`;
+    const series = [{ name: 'Strategy', vals: Array.from(r.eq, v => v / r.eq[0] - 1), color: 'var(--accent)', w: 2 }];
+    if (m.bench) series.push({ name: m.bench.sym + ' buy & hold (price)', vals: Array.from(m.bench.series, v => v / m.bench.series[0] - 1), color: 'var(--info)', w: 1.4 });
+    series.push({ name: 'Cash ' + BT.P.cashRatePct + '%', vals: Array.from(m.cashSeries, v => v / m.cashSeries[0] - 1), color: 'var(--faint)', dash: true });
+    h += chart({ dates: r.dates, series, fmt: v => (v * 100).toFixed(0) + '%' });
+    h += `<h3>Drawdown</h3>` + chart({ dates: r.dates, series: [{ name: 'Strategy drawdown', vals: ddSeries(r.eq), color: 'var(--bad)', area: true, w: 1.4 }], h: 140, zero: true, fmt: v => (v * 100).toFixed(1) + '%' });
+    if (m.roll.length > 20) h += `<h3>Rolling 12-month return</h3>` + chart({ dates: r.dates.slice(252), series: [{ name: 'Rolling 12m', vals: m.roll, color: 'var(--accent)', area: true, w: 1.4 }], h: 140, zero: true, fmt: v => (v * 100).toFixed(0) + '%' });
+    h += `</div>`;
+    h += `<div class="grid g2"><div class="card"><h2>Acceptance gates · ${esc(cur.name)}</h2>${gateList(m)}<p class="small muted">Judge on Validation and walk-forward, not Train. A strategy that passes only on Train is curve-fitted.</p></div><div class="card"><h2>By market regime · ${esc(cur.name)}</h2><table class="cmpt"><thead><tr><th>Regime</th><th class="n">Days</th><th class="n">Ann. return</th><th class="n">Trades</th><th class="n">Exp.</th><th class="n">PF</th></tr></thead><tbody>${['bull', 'side', 'bear'].map(k => { const x = m.regime[k]; return `<tr><td>${k === 'bull' ? 'Bull' : k === 'bear' ? 'Bear' : 'Sideways'}</td><td class="n">${x.days}</td><td class="n">${SPCT(x.annRet)}</td><td class="n">${x.n}</td><td class="n">${N(x.expR)}R</td><td class="n">${N(x.pf)}</td></tr>`; }).join('')}</tbody></table>
+      <h3>Exit reasons</h3><table class="cmpt"><tbody>${Object.entries(r.trades.reduce((a, x) => (a[x.reason] = (a[x.reason] || 0) + 1, a), {})).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<tr><td>${esc(k)}</td><td class="n">${v}</td></tr>`).join('')}</tbody></table>
+      <h3>Dependence on best trades</h3><div class="small">Top 5 trades = <b>${Number.isFinite(m.top5Share) ? PCT(m.top5Share, 0) : '–'}</b> of net trading P&L. Without them: ${INR(m.tsRest.net)} (PF ${N(m.tsRest.pf)}).</div>
+      <h3>Orders not taken</h3><div class="small muted">${Object.entries(m.skips).filter(([, v]) => v).map(([k, v]) => `${esc(k)}: ${v}`).join(' · ') || 'none'}</div></div></div>`;
+    h += `<div class="card"><div class="split"><h2>Trades · ${esc(cur.name)} <span class="muted">(${r.trades.length})</span></h2><button class="btn sm" data-act="exporttrades">Export CSV</button></div><div class="tw"><table><thead><tr><th>Stock</th><th>Entry</th><th class="n">Price</th><th class="n">Qty</th><th>Exit</th><th class="n">Price</th><th>Reason</th><th class="n">P&L</th><th class="n">R</th><th class="n">Days</th></tr></thead><tbody>${r.trades.slice(-60).reverse().map(x => `<tr><td><b>${esc(x.sym)}</b>${x.partial ? ' <span class="tag" title="Size limited by ' + esc(x.partial) + '">capped</span>' : ''}</td><td>${fmtDate(x.entryDate)}</td><td class="n">${N(x.entry)}</td><td class="n">${x.qty}</td><td>${fmtDate(x.exitDate)}</td><td class="n">${N(x.exit)}</td><td class="small">${esc(x.reason)}</td><td class="n ${cls(x.pnl)}">${INR(x.pnl)}</td><td class="n ${cls(x.R)}">${N(x.R)}</td><td class="n">${x.bars}</td></tr>`).join('')}</tbody></table></div>${r.trades.length > 60 ? '<p class="small muted">Showing latest 60 — export for all.</p>' : ''}</div>`;
+  }
+  if (CMP) h += `<div class="card"><h2>Strategy comparison (same exits, costs and limits)</h2>${['Train', 'Validation'].map(seg => `<h3>${seg}</h3><div class="tw"><table><thead><tr><th>Strategy</th><th class="n">Return</th><th class="n">Max DD</th><th class="n">Trades</th><th class="n">PF</th><th class="n">Exp.</th><th class="n">t-stat</th><th class="n">Exposure</th><th class="n">Gates</th></tr></thead><tbody>${CMP.map(c => { const m = seg === 'Train' ? c.tr : c.va; const g = gates(m); return `<tr><td>${esc(STRATS[c.k])}</td><td class="n ${cls(m.tot)}">${SPCT(m.tot)}</td><td class="n">${PCT(m.dd, 2)}</td><td class="n">${m.n}</td><td class="n">${N(m.pf)}</td><td class="n">${N(m.expR)}R</td><td class="n">${N(m.tR)}</td><td class="n">${PCT(m.exposure)}</td><td class="n">${g.filter(x => x.pass).length}/${g.length}</td></tr>`; }).join('')}</tbody></table></div>`).join('')}<p class="small muted">Prefer the simplest strategy whose Validation results hold up — not the one with the highest Train return.</p></div>`;
+  if (ABL) h += `<div class="card"><h2>Does each filter earn its place? (Train period only)</h2><div class="tw"><table><thead><tr><th>Variant</th><th class="n">Trades</th><th class="n">Exp.</th><th class="n">PF</th><th class="n">Max DD</th><th class="n">Δ expectancy</th></tr></thead><tbody>${ABL.map((a, i) => `<tr><td>${esc(a.name)}</td><td class="n">${a.m.n}</td><td class="n">${N(a.m.expR, 3)}R</td><td class="n">${N(a.m.pf)}</td><td class="n">${PCT(a.m.dd, 2)}</td><td class="n ${i ? cls(ABL[0].m.expR - a.m.expR) : ''}">${i ? (ABL[0].m.expR - a.m.expR >= 0 ? 'filter helps +' : 'filter hurts ') + N(Math.abs(ABL[0].m.expR - a.m.expR), 3) + 'R' : 'baseline'}</td></tr>`).join('')}</tbody></table></div><p class="small muted">Read this on Train only, then confirm on Validation. Differences under ~0.05R are usually noise. Removing a filter that does not help keeps the system simpler.</p></div>`;
+  if (WF) h += WF.error ? `<div class="card"><h2>Walk-forward</h2><div class="banner warn">${esc(WF.error)}</div></div>` : `<div class="card"><h2>Walk-forward (3-year train → next 1-year test, rolling)</h2><div class="small muted" style="margin-bottom:10px">In each window the stop multiple (1.5/2/3 ATR) and exit method are chosen on the training years only, then applied unchanged to the next year. Holdout is never touched.</div>
+    <div class="kpis">${[['Stitched out-of-sample return', SPCT(WF.tot)], ['CAGR', PCT(WF.cagr, 2)], ['Max drawdown', PCT(WF.dd, 2)], ['Trades', WF.n], ['Profit factor', N(WF.pf)], ['Expectancy', N(WF.expR) + 'R'], ['t-stat', N(WF.tR)], ['Different settings chosen', WF.stability + ' of ' + WF.windows.length]].map(k => `<div class="kpi"><span>${k[0]}</span><b>${k[1]}</b></div>`).join('')}</div>
+    ${chart({ dates: WF.dates, series: [{ name: 'Walk-forward OOS equity', vals: Array.from(WF.eq, v => v / WF.eq[0] - 1), color: 'var(--accent)' }], fmt: v => (v * 100).toFixed(0) + '%', legend: true })}
+    <div class="tw" style="margin-top:12px"><table><thead><tr><th>Test year</th><th>Chosen on train</th><th class="n">Train exp.</th><th class="n">Test return</th><th class="n">Test DD</th><th class="n">Test trades</th><th class="n">Test exp.</th></tr></thead><tbody>${WF.windows.map(w => `<tr><td>${fmtDate(w.test[0]).slice(3)} – ${fmtDate(w.test[1]).slice(3)}</td><td>${w.chosen.atrMult}×ATR · ${esc(EXITS[w.chosen.exitMode])}</td><td class="n">${N(w.trainExpR)}R</td><td class="n ${cls(w.testRet)}">${SPCT(w.testRet)}</td><td class="n">${PCT(w.testDD, 2)}</td><td class="n">${w.testN}</td><td class="n ${cls(w.testExpR)}">${N(w.testExpR)}R</td></tr>`).join('')}</tbody></table></div><p class="small muted">If the chosen settings jump around every year, or test years are much worse than training, the "best" parameters are noise.</p></div>`;
+  return h;
+}
+
+function viewJournal() {
+  if (!ENG.DATA) return `<div class="top"><h1>Journal</h1></div>` + noData();
+  const ps = paperState(); const closed = ps.closed.slice().reverse(); const ts = tradeStats(ps.closed);
+  let h = `<div class="top"><div><h1>Paper journal</h1><div class="sub">Replayed from your approvals against the loaded data · ${CLOUD.db ? 'synced to your account' : 'saved on this device'}</div></div><div class="row"><button class="btn sm" data-act="exportjournal">Export CSV</button><button class="btn sm" data-act="papercap">Paper capital</button></div></div>` + dataBanner();
+  h += `<div class="kpis">${[['Starting capital', INR(PAPER.capital)], ['Equity now', INR(ps.equity)], ['Realised P&L', `<span class="${cls(ts.net)}">${INR(ts.net || 0)}</span>`], ['Closed trades', ts.n + (ts.n ? ' · ' + PCT(ts.winRate, 0) + ' wins' : '')]].map(k => `<div class="kpi"><span>${k[0]}</span><b>${k[1]}</b></div>`).join('')}</div>`;
+  if (ps.eq.length > 5) h += `<div class="card"><h2>Paper equity</h2>${chart({ dates: ps.eqDates, series: [{ name: 'Paper equity', vals: ps.eq, color: 'var(--accent)' }], h: 180, fmt: v => '₹' + (v / 1e5).toFixed(2) + 'L' })}</div>`;
+  h += `<div class="card"><h2>Open positions</h2>${ps.open.length ? `<div class="tw"><table><thead><tr><th>Stock</th><th>Entered</th><th class="n">Qty</th><th class="n">Entry</th><th class="n">Last</th><th class="n">Stop</th><th class="n">P&L</th><th></th></tr></thead><tbody>${ps.open.map(p => `<tr><td><b>${esc(p.sym)}</b>${p.exitFlag ? `<div class="small warnc">${esc(p.exitFlag)} → exit next open</div>` : ''}</td><td>${fmtDate(p.entryDate)}</td><td class="n">${p.qty}</td><td class="n">${N(p.entry)}</td><td class="n">${N(p.last)}</td><td class="n">${N(p.stop)}</td><td class="n ${cls(p.qty * p.last - p.cost)}">${INR(p.qty * p.last - p.cost)}</td><td><div class="row" style="flex-wrap:nowrap"><button class="btn sm" data-act="fill" data-id="${p.id}">Edit fill</button><button class="btn sm" data-act="close" data-id="${p.id}">Close</button><button class="btn sm" data-act="note" data-id="${p.id}">Note</button></div></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">No open positions. Approve candidates on the Today tab.</div>'}</div>`;
+  h += `<div class="card"><h2>Trade history</h2>${closed.length ? `<div class="tw"><table><thead><tr><th>Stock</th><th>Entry</th><th class="n">Price</th><th>Exit</th><th class="n">Price</th><th>Reason</th><th class="n">P&L</th><th class="n">R</th><th>Note</th></tr></thead><tbody>${closed.map(x => `<tr><td><b>${esc(x.sym)}</b></td><td>${fmtDate(x.entryDate)}</td><td class="n">${N(x.entry)}</td><td>${fmtDate(x.exitDate)}</td><td class="n">${N(x.exit)}</td><td class="small">${esc(x.reason)}</td><td class="n ${cls(x.pnl)}">${INR(x.pnl)}</td><td class="n">${N(x.R)}</td><td class="small"><a href="#" data-act="note" data-id="${x.id}">${esc((PAPER.notes || {})[x.id] || 'add')}</a></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">No closed trades yet.</div>'}</div>`;
+  if (ps.skipped.length) h += `<div class="card"><h2>Approved but not filled</h2><table><tbody>${ps.skipped.map(s => `<tr><td><b>${esc(s.sym)}</b></td><td>${fmtDate(s.sigDate)}</td><td class="small">${esc(s.why)}</td></tr>`).join('')}</tbody></table></div>`;
+  return h;
+}
+
+function viewSetup() {
+  const D = ENG.DATA;
+  let h = `<div class="top"><div><h1>Setup</h1><div class="sub">Data, risk limits, costs and research settings</div></div></div>`;
+  h += `<div class="card"><h2>1 · Market data</h2>`;
+  if (D) {
+    const v = D.validation; h += `<div class="kpis">${[['Series', D.nSyms], ['Stocks in universe', ENG.UNIV.length], ['From', fmtDate(D.dates[0])], ['To', fmtDate(D.dates[D.dates.length - 1])]].map(k => `<div class="kpi"><span>${k[0]}</span><b>${k[1]}</b></div>`).join('')}</div>`;
+    h += v.issues.map(([lv, msg]) => `<div class="banner ${lv === 'bad' ? 'bad' : lv === 'warn' ? 'warn' : 'info'}">${esc(msg)}</div>`).join('');
+    if (v.flagged.length) h += `<details><summary>Symbols with >30% daily jumps (${v.flagged.length})</summary><p class="small mono">${v.flagged.map(esc).join(', ')}</p></details>`;
+    const keys = Object.keys(D.syms).sort();
+    h += `<div class="fields" style="margin:12px 0"><div class="field"><label>Regime index (Nifty 50)</label><select data-set="regimeSym"><option value="">auto (${esc(D.regSym || 'none')})</option>${keys.filter(k => D.syms[k].isIndex).map(k => `<option ${S.regimeSym === k ? 'selected' : ''}>${esc(k)}</option>`).join('')}</select></div><div class="field"><label>Benchmark (Nifty 200 TRI ideal)</label><select data-set="benchSym"><option value="">auto (${esc(D.benchSym || 'none')})</option>${keys.filter(k => D.syms[k].isIndex).map(k => `<option ${S.benchSym === k ? 'selected' : ''}>${esc(k)}</option>`).join('')}</select></div></div>`;
+  }
+  h += `<label class="drop" id="drop"><input type="file" id="files" multiple accept=".csv,.txt,text/csv" style="display:none"><b>Tap to choose CSV files</b> or drop them here<div class="small" style="margin-top:6px">Prices (one long file or one file per stock), Nifty 50 / Nifty 200 TRI, sectors, point-in-time membership. New files are merged with loaded data.</div></label>
+  <div class="row" style="margin-top:12px">${PUBMAN ? `<button class="btn pri" data-act="loadpub">Load published NSE data (${fmtDate(PUBMAN.lastDate)})</button>` : ''}<button class="btn" data-act="demo">Load synthetic demo</button>${D ? '<button class="btn danger" data-act="cleardata">Clear data</button>' : ''}${CLOUD.assets && D ? '<button class="btn" data-act="cloudup">Sync data to my other devices</button>' : ''}${CLOUD.assets && META.cloudData ? `<button class="btn" data-act="clouddown">Load synced data (${fmtDate(META.cloudData.lastDate)})</button>` : ''}</div>
+  <p class="small muted">Price data is stored on this device. Use “Sync data” once on your PC, then “Load synced data” on your iPhone.</p>
+  <details><summary>Accepted file formats</summary><div class="small prose"><ul>
+  <li><b>Prices, long format:</b> <code>Date,Symbol,Open,High,Low,Close,Volume</code> — what the download script produces.</li>
+  <li><b>Prices, one file per stock:</b> Yahoo/NSE style <code>Date,Open,High,Low,Close,(Adj Close),Volume</code>; file name = symbol (e.g. <code>TCS.csv</code>). If Adj Close exists, OHLC are scaled by it.</li>
+  <li><b>Index:</b> symbol <code>NIFTY50</code>. TRI files from niftyindices.com with a “Total Returns Index” column work too — name the file e.g. <code>NIFTY200TRI.csv</code>.</li>
+  <li><b>Sectors:</b> <code>Symbol,Industry</code> (the Nifty 200 constituent list from niftyindices.com works as-is).</li>
+  <li><b>Point-in-time membership:</b> <code>Symbol,From,To</code> — one row per period a stock was in the index (blank To = still in). Removes survivorship bias.</li></ul></div></details></div>`;
+  h += `<div class="card"><h2>2 · Get real NSE data (run once a day on your PC)</h2><div class="small prose"><ol><li>Install Python, then run <code>pip install yfinance pandas</code>.</li><li>Download the Nifty 200 constituent CSV from niftyindices.com and save it as <code>ind_nifty200list.csv</code> next to the script.</li><li>Run <code>python sthir_data.py</code>. Upload the resulting <code>prices.csv</code> and <code>sectors.csv</code> here.</li></ol><p class="warnc">Free Yahoo data is fine for learning but not institution-grade: it has gaps, occasional bad adjustments, and no delisted stocks. Using today's Nifty 200 list for history creates survivorship bias.</p></div><div class="row"><button class="btn sm" data-act="copyscript">Copy script</button></div><pre>${esc(PY_SCRIPT)}</pre></div>`;
+  h += `<div class="card"><h2>3 · Capital & risk limits</h2><div class="fields">${numField('capital', 'Backtest capital (₹)', '10000')}${numField('riskPct', 'Risk per trade (% of equity)', '0.05')}${numField('maxPos', 'Max positions', '1')}${numField('maxAllocPct', 'Max per stock (% of equity)', '1')}${numField('maxDeployPct', 'Max deployed (% of equity)', '5')}${numField('maxOpenRiskPct', 'Max open risk (% of equity)', '0.1')}${numField('maxPerSector', 'Max positions per sector (0 = off)', '1')}${numField('corrMax', 'Max correlation with a holding', '0.05')}</div>${chkField('useCorr', 'Apply correlation limit (60-day returns)')}</div>`;
+  h += `<div class="card"><h2>4 · Eligibility & signals</h2><div class="fields">${numField('minPrice', 'Min price (₹)', '5')}${numField('minADVcr', 'Min 20-day avg traded value (₹ crore)', '1')}${numField('participationPct', 'Max order as % of avg daily volume', '0.5')}${numField('pbTolPct', 'Pullback tolerance to 20-EMA (%)', '0.25')}${numField('rsiLo', 'RSI lower', '1')}${numField('rsiHi', 'RSI upper', '1')}${numField('boLen', 'Breakout lookback (days)', '1')}${numField('boVolMult', 'Breakout volume × average', '0.1')}${numField('rsTopPct', 'RS: top % of universe', '1')}</div><div class="field" style="margin-top:12px"><label>Exclude symbols (ASM/GSM/T2T or anything you won't trade) — comma or space separated</label><textarea data-set="exclude" rows="2">${esc(S.exclude)}</textarea></div></div>`;
+  h += `<div class="card"><h2>5 · Costs (equity delivery)</h2><div class="fields">${numField('slipPct', 'Slippage per side (%)', '0.01')}${numField('halfSpreadPct', 'Half bid-ask spread (%)', '0.01')}${numField('gapExtraPct', 'Extra slippage on gap-down stops (%)', '0.05')}${numField('brokPct', 'Brokerage (% of order, 0 = free)', '0.01')}${numField('brokCap', 'Brokerage cap per order (₹)', '1')}${numField('dpCharge', 'DP charge per sell (₹, incl. GST)', '0.01')}${numField('sttPct', 'STT each side (%)', '0.001')}${numField('stampPct', 'Stamp duty on buy (%)', '0.001')}${numField('exchPct', 'NSE transaction charge (%)', '0.00001')}${numField('sebiPct', 'SEBI fee (%)', '0.00001')}${numField('gstPct', 'GST on brokerage + exchange + SEBI (%)', '1')}</div><p class="small muted">Defaults: STT 0.1% on buy and sell, stamp duty 0.015% on buy, NSE 0.00297%, SEBI ₹10/crore, GST 18%. Round trip on a ₹40,000 position ≈ ${INR(tradeCost('buy', 40000, S) + tradeCost('sell', 40000, S))} in charges plus ≈ ${INR(40000 * 2 * (S.slipPct + S.halfSpreadPct) / 100)} slippage. Verify with your broker's contract note.</p></div>`;
+  h += `<div class="card"><h2>6 · Cash, tax & research splits</h2><div class="fields">${numField('cashRatePct', 'Cash / T-bill yield (% p.a.)', '0.1')}${numField('stcgPct', 'STCG tax incl. cess (%)', '0.1')}${numField('slabPct', 'Your slab rate on interest (%)', '0.1')}${numField('trainPct', 'Train share (%)', '5')}${numField('valPct', 'Validation share (%)', '5')}</div>${chkField('idleInterest', 'Idle cash earns the cash yield in backtests', 'Fair comparison: unused money would sit in a liquid fund')}<p class="small muted">Holdout = the remaining ${Math.max(0, 100 - S.trainPct - S.valPct)}%. Tax rules change — confirm with a tax adviser; this is an estimate.</p><div class="row"><button class="btn danger sm" data-act="resetsettings">Reset all settings to defaults</button></div></div>`;
+  return h;
+}
+
+/* ---------- research report (Phase 1) ---------- */
+function viewResearch() { return `<div class="top"><div><h1>Phase 1 · Feasibility report</h1><div class="sub">Can a conservative NSE swing system add return to ₹10 lakh after costs and tax?</div></div></div><div class="card prose">${RESEARCH_HTML}</div>`; }
+
+/* ---------- render ---------- */
+function render() {
+  renderNav();
+  const v = { today: viewToday, scan: viewScan, backtest: viewBacktest, journal: viewJournal, research: viewResearch, setup: viewSetup }[TAB] || viewToday;
+  let html; try { html = v(); } catch (e) { console.error(e); html = `<div class="banner bad">Something went wrong drawing this page: ${esc(e.message)}</div>`; }
+  $('#main').innerHTML = html; requestAnimationFrame(drawCharts); bindDrop();
+}
+function bindDrop() {
+  const dz = $('#drop'), fi = $('#files'); if (!dz) return;
+  fi.onchange = () => loadFiles([...fi.files]);
+  dz.ondragover = e => { e.preventDefault(); dz.classList.add('hover'); }; dz.ondragleave = () => dz.classList.remove('hover');
+  dz.ondrop = e => { e.preventDefault(); dz.classList.remove('hover'); loadFiles([...e.dataTransfer.files]); };
+}
+async function loadFiles(files) {
+  if (!files.length) return; toast('Reading ' + files.length + ' file(s)…'); await sleep(30);
+  const raw = ENG.DATA && !ENG.DATA.synthetic ? dataToRaw(ENG.DATA) : {}; const sectors = { ...(ENG.DATA && !ENG.DATA.synthetic ? ENG.DATA.sectors : {}) }; const membership = { ...(ENG.DATA && !ENG.DATA.synthetic ? ENG.DATA.membership : {}) };
+  const notes = [];
+  for (const f of files) {
+    try { const txt = await f.text(); const r = parseFile(f.name, txt); notes.push(r.note);
+      if (r.kind === 'prices') for (const k in r.map) { const ex = raw[k] ? new Map(raw[k].map(x => [x[0], x])) : new Map(); for (const row of r.map[k]) ex.set(row[0], row); raw[k] = [...ex.values()]; }
+      else if (r.kind === 'sectors') Object.assign(sectors, r.map); else if (r.kind === 'membership') Object.assign(membership, r.map);
+    } catch (e) { notes.push(f.name + ': could not read (' + e.message + ')'); }
+  }
+  if (!Object.keys(raw).length) { await dialog('No price data found', `<ul class="small">${notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>`, [{ label: 'OK', cls: 'pri' }]); return; }
+  await installDataset(raw, { sectors, membership, synthetic: false });
+  await dialog('Data loaded', `<ul class="small">${notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul><p class="small">Calendar: ${fmtDate(ENG.DATA.dates[0])} → ${fmtDate(ENG.DATA.dates[ENG.DATA.dates.length - 1])}. Check the validation notes on Setup.</p>`, [{ label: 'OK', cls: 'pri' }]);
+  render();
+}
+
+/* ---------- actions ---------- */
+function setProg(x) { const p = $('#prog div'); if (p) p.style.width = (x * 100).toFixed(0) + '%'; }
+function summarize(label, m) { const g = gates(m); META.lastSummary = { label, start: m.start, end: m.end, tot: m.tot, cagr: m.cagr, dd: m.dd, pf: m.pf, expR: m.expR, n: m.n, gates: g.filter(x => x.pass).length + ' / ' + g.length, synthetic: ENG.DATA.synthetic }; persist('meta'); }
+const ACTIONS = {
+  async loadpub() { if (!PUBMAN) return; toast('Loading published NSE data…'); try { await loadPublished(PUBMAN); render(); toast('NSE data loaded'); } catch (e) { dialog('Could not load', `<p>${esc(e.message)}</p>`, [{ label: 'OK' }]); } },
+  async demo() { toast('Generating synthetic market…'); await sleep(30); const syn = makeSynthetic(Math.floor(Math.random() * 1e6), 80, 2600); await installDataset(syn.raw, { sectors: syn.sectors, synthetic: true }); render(); toast('Synthetic demo loaded — random data, no real edge'); },
+  async cleardata() { const r = await dialog('Clear market data?', '<p>Removes price data from this device. Your paper journal and settings are kept.</p>', [{ label: 'Cancel' }, { label: 'Clear', cls: 'danger', val: 1 }]); if (!r.v) return; ENG.DATA = null; ENG.IND = null; BT = CMP = ABL = WF = HOLD = null; try { await idbSet('dataset', null); } catch { } render(); },
+  setv(b) { S[b.dataset.k] = b.dataset.v; persist('settings'); render(); },
+  scanall(b) { SCANALL = b.dataset.v === '1'; render(); },
+  seg(b) { BTSEG = b.dataset.v; render(); },
+  report() { copyText(dailyReport(), 'Daily report copied'); },
+  copyscript() { copyText(PY_SCRIPT, 'Script copied'); },
+  async run() {
+    BUSY = true; render(); await sleep(30); const sp = splits(S); const P = { ...S };
+    const r1 = backtest(P, ...sp.train); setProg(.5); await sleep(10); const r2 = backtest(P, ...sp.val);
+    BT = { P, train: { r: r1, m: metrics(r1, P) }, val: { r: r2, m: metrics(r2, P) } }; HOLD = null; BTSEG = 'val';
+    summarize(STRATS[P.strategy] + ' · ' + EXITS[P.exitMode] + ' · validation', BT.val.m); BUSY = false; render();
+  },
+  async compare() { BUSY = true; render(); await sleep(30); const sp = splits(S); const out = []; let i = 0; for (const k of Object.keys(STRATS)) { const P = { ...S, strategy: k }; out.push({ k, tr: metrics(backtest(P, ...sp.train), P), va: metrics(backtest(P, ...sp.val), P) }); setProg(++i / 3); await sleep(10); } CMP = out; BUSY = false; render(); },
+  async ablate() { BUSY = true; render(); await sleep(30); const sp = splits(S); ABL = ablation({ ...S }, ...sp.train); BUSY = false; render(); },
+  async wf() { BUSY = true; render(); await sleep(30); const sp = splits(S); WF = await walkForward({ ...S }, sp.train[0], sp.val[1], setProg); BUSY = false; render(); },
+  async holdout() {
+    if (!BT) { toast('Run train + validation first'); return; }
+    const first = !META.holdoutUnlocked;
+    const r = await dialog(first ? 'Open the holdout test?' : 'Holdout already used', first ? `<p>The holdout (${fmtDate(ENG.DATA.dates[splits(S).test[0]])} onward) is your only untouched data. Look at it <b>once</b>, after you have finished designing on Train/Validation.</p><p class="small muted">If you change rules after seeing it and test again, it is no longer out-of-sample. The app counts how often you open it.</p>` : `<p>You have opened the holdout ${META.holdoutRuns} time(s). Each extra look turns it into training data. Results after the first look should be treated as optimistic.</p>`, [{ label: 'Cancel' }, { label: first ? 'Run holdout once' : 'Run anyway', cls: 'pri', val: 1 }]);
+    if (!r.v) return; META.holdoutUnlocked = true; META.holdoutRuns = (META.holdoutRuns || 0) + 1; persist('meta');
+    BUSY = true; render(); await sleep(30); const sp = splits(S); const P = BT.P; const rr = backtest(P, ...sp.test); HOLD = { r: rr, m: metrics(rr, P) }; BTSEG = 'hol';
+    summarize(STRATS[P.strategy] + ' · ' + EXITS[P.exitMode] + ' · holdout', HOLD.m); BUSY = false; render();
+  },
+  exporttrades() { const segs = { tra: BT.train, val: BT.val, hol: HOLD }; const r = (segs[BTSEG] || BT.val).r; saveFile('sthir_trades.csv', toCSV([['symbol', 'sector', 'entry_date', 'entry', 'qty', 'initial_stop', 'exit_date', 'exit', 'reason', 'pnl', 'R', 'sessions', 'regime', 'costs'], ...r.trades.map(x => [x.sym, x.sector, x.entryDate, x.entry.toFixed(2), x.qty, x.stop0.toFixed(2), x.exitDate, x.exit.toFixed(2), x.reason, x.pnl.toFixed(2), x.R.toFixed(3), x.bars, x.regime, x.costs.toFixed(2)])])); },
+  exportjournal() { const ps = paperState(); saveFile('sthir_paper_journal.csv', toCSV([['symbol', 'status', 'entry_date', 'entry', 'qty', 'stop', 'exit_date', 'exit', 'reason', 'pnl', 'R', 'note'], ...ps.open.map(p => [p.sym, 'open', p.entryDate, p.entry.toFixed(2), p.qty, p.stop.toFixed(2), '', '', '', (p.qty * p.last - p.cost).toFixed(2), '', (PAPER.notes || {})[p.id] || '']), ...ps.closed.map(x => [x.sym, 'closed', x.entryDate, x.entry.toFixed(2), x.qty, x.stop0.toFixed(2), x.exitDate, x.exit.toFixed(2), x.reason, x.pnl.toFixed(2), x.R.toFixed(3), (PAPER.notes || {})[x.id] || ''])])); },
+  async approve(b) {
+    const ps = paperState(); const c = candidatesToday(ps).find(x => x.sym === b.dataset.sym); if (!c || c.block) { toast('No longer allowed'); return; }
+    const r = await dialog('Paper order · ' + c.sym, `<table class="cmpt small"><tbody>${[['Signal date', fmtDate(ENG.DATA.dates[ps.t])], ['Buy at', 'next session open (paper)'], ['Est. entry', INR(c.estEntry, 2)], ['Do not buy if it opens above', INR(c.maxBuy, 2)], ['Initial stop', INR(c.stop, 2) + ' (' + S.atrMult + '×ATR)'], ['Risk if stopped', INR(c.risk) + ' · ' + PCT(c.risk / ps.equity, 2) + ' of equity'], ['Position value', INR(c.value) + ' · ' + PCT(c.value / ps.equity, 1)]].map(x => `<tr><td>${x[0]}</td><td class="n">${x[1]}</td></tr>`).join('')}</tbody></table>
+      <ul class="small">${exitRulesText(S, { stop: c.stop, target: c.target }).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+      <div class="fields" style="grid-template-columns:1fr 1fr"><div class="field"><label>Quantity (max ${c.qty})</label><input name="qty" type="number" inputmode="numeric" value="${c.qty}" min="1" max="${c.qty}"></div><div class="field"><label>Note (why this trade)</label><input name="note" placeholder="optional"></div></div>
+      <p class="small muted">Paper only. Nothing is sent to any broker. Losses can exceed the planned risk if the stock gaps down.</p>`, [{ label: 'Cancel' }, { label: 'Approve paper order', cls: 'pri', val: 1 }]);
+    if (!r.v) return; const q = Math.max(1, Math.min(c.qty, Math.floor(+r.vals.qty || c.qty)));
+    const params = {}; EXIT_KEYS.forEach(k => params[k] = S[k]);
+    const id = 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    PAPER.approvals.push({ id, sym: c.sym, sector: c.sector, strategy: S.strategy, sigDate: ENG.DATA.dates[ps.t], sigClose: c.close, atr: c.atr, qty: q, params, at: new Date().toISOString() });
+    if (r.vals.note) (PAPER.notes = PAPER.notes || {})[id] = r.vals.note;
+    persist('paper'); render(); toast('Approved — fills at next open when you load the next day\'s data');
+  },
+  cancel(b) { (PAPER.cancelled = PAPER.cancelled || {})[b.dataset.id] = true; persist('paper'); render(); },
+  async close(b) {
+    const ps = paperState(); const p = ps.open.find(x => x.id === b.dataset.id); if (!p) return;
+    const r = await dialog('Close ' + p.sym + ' (paper)', `<div class="fields" style="grid-template-columns:1fr 1fr"><div class="field"><label>Exit date</label><input name="date" type="date" value="${ENG.DATA.dates[ps.t]}"></div><div class="field"><label>Exit price</label><input name="price" type="number" step="0.05" value="${p.last.toFixed(2)}"></div></div><p class="small muted">Manual exits are recorded as "Manual close". Overriding the system's exits is the most common way real traders lose an edge — note why.</p>`, [{ label: 'Cancel' }, { label: 'Close position', cls: 'pri', val: 1 }]);
+    if (!r.v || !(+r.vals.price > 0)) return; (PAPER.closes = PAPER.closes || {})[p.id] = { date: r.vals.date, price: +r.vals.price }; persist('paper'); render();
+  },
+  async fill(b) {
+    const ps = paperState(); const p = ps.open.find(x => x.id === b.dataset.id); if (!p) return;
+    const r = await dialog('Actual fill for ' + p.sym, `<p class="small muted">If you mirrored this paper trade, enter your real fill so the journal matches. The stop is recalculated from the new entry.</p><div class="fields" style="grid-template-columns:1fr 1fr"><div class="field"><label>Entry price</label><input name="entry" type="number" step="0.05" value="${p.entry.toFixed(2)}"></div><div class="field"><label>Quantity</label><input name="qty" type="number" value="${p.qty}"></div></div>`, [{ label: 'Cancel' }, { label: 'Save', cls: 'pri', val: 1 }]);
+    if (!r.v) return; (PAPER.overrides = PAPER.overrides || {})[p.id] = { entry: +r.vals.entry, qty: Math.floor(+r.vals.qty) }; persist('paper'); render();
+  },
+  async note(b) { const id = b.dataset.id; const r = await dialog('Trade note', `<textarea name="t" rows="4" placeholder="What did you see? What did you feel? Did you follow the rules?">${esc((PAPER.notes || {})[id] || '')}</textarea>`, [{ label: 'Cancel' }, { label: 'Save', cls: 'pri', val: 1 }]); if (!r.v) return; (PAPER.notes = PAPER.notes || {})[id] = r.vals.t; persist('paper'); render(); },
+  async papercap() {
+    const r = await dialog('Paper trading capital', `<div class="field"><label>Starting capital (₹)</label><input name="c" type="number" value="${PAPER.capital}"></div><label class="chk"><input type="checkbox" name="reset"><span>Also erase all paper trades and start fresh</span></label>`, [{ label: 'Cancel' }, { label: 'Save', cls: 'pri', val: 1 }]);
+    if (!r.v) return; PAPER.capital = Math.max(10000, +r.vals.c || PAPER.capital); if (r.vals.reset) { PAPER.approvals = []; PAPER.closes = {}; PAPER.overrides = {}; PAPER.notes = {}; PAPER.cancelled = {}; } persist('paper'); render();
+  },
+  async resetsettings() { const r = await dialog('Reset settings?', '<p>All risk, cost and strategy settings go back to defaults.</p>', [{ label: 'Cancel' }, { label: 'Reset', cls: 'danger', val: 1 }]); if (!r.v) return; S = { ...DEFAULTS }; persist('settings'); setExclusions(''); ENG.indKey = ''; if (ENG.DATA) computeIndicators(S); render(); },
+  async cloudup() {
+    if (!CLOUD.assets || !ENG.DATA) return; toast('Packing data…'); await sleep(30);
+    try {
+      const D = ENG.DATA; const keys = Object.keys(D.syms); const chunks = []; let cur = { syms: {} }, size = 0;
+      const r2 = x => Number.isFinite(x) ? Math.round(x * 100) / 100 : null;
+      for (const k of keys) { const s = D.syms[k]; const o = { f: s.first, o: [], h: [], l: [], c: [], v: [] }; for (let i = s.first; i <= s.last; i++) { o.o.push(r2(s.o[i])); o.h.push(r2(s.h[i])); o.l.push(r2(s.l[i])); o.c.push(r2(s.c[i])); o.v.push(Number.isFinite(s.v[i]) ? Math.round(s.v[i]) : null); } const js = JSON.stringify(o); if (size + js.length > 12e6 && size) { chunks.push(cur); cur = { syms: {} }; size = 0; } cur.syms[k] = o; size += js.length; }
+      chunks.push(cur); chunks[0].head = { dates: D.dates, sectors: D.sectors, membership: D.membership, synthetic: D.synthetic };
+      const ids = []; let i = 0; for (const ch of chunks) { const res = await CLOUD.assets.upload(new Blob([JSON.stringify(ch)], { type: 'application/json' }), { type: 'application/json' }); ids.push(res.id); toast('Uploaded part ' + (++i) + ' of ' + chunks.length); }
+      META.cloudData = { ids, at: new Date().toISOString(), lastDate: D.dates[D.dates.length - 1], nSyms: keys.length }; persist('meta'); render(); toast('Data synced. Open Sthir on your other device → Setup → Load synced data');
+    } catch (e) { dialog('Sync failed', `<p>${esc((e && (e.message || e.code)) || 'Unknown error')}</p>`, [{ label: 'OK' }]); }
+  },
+  async clouddown() {
+    if (!META.cloudData) return; toast('Downloading synced data…');
+    try {
+      const parts = []; for (const id of META.cloudData.ids) { const r = await fetch('/_blob/' + id); if (!r.ok) throw new Error('part missing (' + r.status + ')'); parts.push(await r.json()); }
+      const head = parts[0].head; const raw = {};
+      for (const p of parts) for (const k in p.syms) { const o = p.syms[k]; const rows = []; for (let j = 0; j < o.c.length; j++) if (o.c[j] > 0) rows.push([head.dates[o.f + j], o.o[j], o.h[j], o.l[j], o.c[j], o.v[j] == null ? NaN : o.v[j]]); raw[k] = rows; }
+      await installDataset(raw, { sectors: head.sectors, membership: head.membership, synthetic: head.synthetic }); render(); toast('Synced data loaded');
+    } catch (e) { dialog('Could not load synced data', `<p>${esc(e.message || e)}</p>`, [{ label: 'OK' }]); }
+  }
+};
+document.addEventListener('click', e => {
+  const tb = e.target.closest('[data-tab]'); if (tb) { e.preventDefault(); go(tb.dataset.tab); return; }
+  const b = e.target.closest('[data-act]'); if (b && ACTIONS[b.dataset.act]) { e.preventDefault(); if (b.disabled) return; ACTIONS[b.dataset.act](b); }
+});
+document.addEventListener('change', e => {
+  const el = e.target.closest('[data-set]'); if (!el) return; const k = el.dataset.set;
+  let v = el.type === 'checkbox' ? el.checked : el.type === 'number' ? parseFloat(el.value) : el.value;
+  if (el.type === 'number' && !Number.isFinite(v)) { toast('Please enter a number'); return; }
+  S[k] = v; persist('settings');
+  if (k === 'exclude') setExclusions(v);
+  if (ENG.DATA && (k === 'regimeSym' || k === 'benchSym')) { if (k === 'regimeSym') { const g = v || guessIndexSyms(Object.keys(ENG.DATA.syms)).reg; ENG.DATA.regSym = g; } else { ENG.DATA.benchSym = v || guessIndexSyms(Object.keys(ENG.DATA.syms)).bench; } ENG.indKey = ''; }
+  if (ENG.DATA && (k === 'boLen' || k === 'maLen' || k === 'regimeSym' || k === 'benchSym')) { ENG.indKey = ''; computeIndicators(S); }
+  if (TAB !== 'setup') render(); else { renderNav(); }
+});
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState !== 'visible') return; const m = await fetchManifest(); if (!m) return; PUBMAN = m;
+  const D = ENG.DATA; if (D && D.source === 'published' && m.lastDate > D.dates[D.dates.length - 1]) { try { await loadPublished(m); toast('New NSE data loaded · ' + fmtDate(m.lastDate)); } catch { } render(); }
+});
+window.addEventListener('hashchange', () => { const h = location.hash.slice(1); if (TABS.some(t => t[0] === h) && h !== TAB) { TAB = h; render(); } });
+
+function dailyReport() {
+  if (!ENG.DATA) return 'No data loaded.'; const ps = paperState(); const ri = regimeInfo(ps.t); const c = candidatesToday(ps);
+  const L = []; L.push('STHIR DAILY REPORT — signals from close of ' + fmtDate(ENG.DATA.dates[ps.t]) + (ENG.DATA.synthetic ? ' [SYNTHETIC DATA]' : ''));
+  L.push('Paper only. No orders are placed automatically.'); L.push('');
+  L.push('Regime: ' + (ri ? (ri.up ? 'RISK-ON' : 'RISK-OFF') + ' — ' + ri.sym + ' ' + SPCT(ri.dist) + ' vs 200-SMA' : 'unknown'));
+  L.push('Equity ' + INR(ps.equity) + ' | Cash ' + INR(ps.cash) + ' | Invested ' + PCT(ps.mv / ps.equity) + ' | Open risk ' + PCT(ps.openRisk / ps.equity, 2) + ' | Drawdown ' + PCT(ps.dd, 2)); L.push('');
+  L.push('CANDIDATES (' + STRATS[S.strategy] + '):'); if (!c.length) L.push('  None. Stay in cash.');
+  c.slice(0, 15).forEach(x => L.push(`  ${x.sym}: qty ${x.qty}, est entry ${INR(x.estEntry, 2)}, stop ${INR(x.stop, 2)}, risk ${INR(x.risk)}; skip if opens > ${INR(x.maxBuy, 2)}${x.block ? ' — BLOCKED: ' + x.block : ''}`));
+  L.push(''); L.push('OPEN POSITIONS:'); if (!ps.open.length) L.push('  None.');
+  ps.open.forEach(p => L.push(`  ${p.sym}: ${p.qty} @ ${INR(p.entry, 2)}, last ${INR(p.last, 2)}, stop ${INR(p.stop, 2)}, day ${p.bars}/${p.P.timeStop}${p.exitFlag ? ' — EXIT NEXT OPEN: ' + p.exitFlag : ''}`));
+  if (ps.pending.length) { L.push(''); L.push('APPROVED, FILL AT NEXT OPEN:'); ps.pending.forEach(a => L.push(`  ${a.sym}: ${a.qty} shares; skip if opens > ${INR(a.sigClose + S.maxChaseATR * a.atr, 2)}`)); }
+  return L.join('\n');
+}
+
+/* ---------- boot ---------- */
+(async function boot() {
+  const s = LS.get('settings'); if (s) S = { ...DEFAULTS, ...s }; const p = LS.get('paper'); if (p) PAPER = { ...PAPER, ...p }; const m = LS.get('meta'); if (m) META = { ...META, ...m };
+  setExclusions(S.exclude);
+  const h = location.hash.slice(1); if (TABS.some(t => t[0] === h)) TAB = h;
+  render();
+  try { const d = await idbGet('dataset'); if (d && d.dates) { ENG.DATA = d; computeIndicators(S); render(); } } catch (e) { console.warn('idb', e); }
+  initCloud();
+  PUBMAN = await fetchManifest();
+  if (PUBMAN) {
+    const D = ENG.DATA; const cur = D ? D.dates[D.dates.length - 1] : '';
+    if (!D || D.synthetic || (D.source === 'published' && PUBMAN.lastDate > cur)) {
+      toast('Loading NSE data up to ' + fmtDate(PUBMAN.lastDate) + '…');
+      try { await loadPublished(PUBMAN); toast('NSE data loaded · ' + ENG.UNIV.length + ' stocks'); } catch (e) { toast('Could not load published data: ' + e.message); }
+    }
+    render();
+  }
+})();
+
+</script>
+</body>
+</html>
